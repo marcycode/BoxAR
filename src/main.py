@@ -7,11 +7,15 @@ from sound_effect import SoundEffect
 from Speed import Speed
 from datetime import datetime
 from punchanimation import PunchAnimation
+from challenge import ChallengeManager
+from update_hook import EventManager
+from observer import CollisionObserver
 
 punchanimation = PunchAnimation("assets/punchanimation.gif")
 
 QUEUE_SIZE = 10
 COOLDOWN = 0
+
 # Initialize components
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
@@ -24,6 +28,31 @@ punch_sound = SoundEffect("assets/Punch.mp3", cooldown=1.0)  # Set a 1-second co
 ignore_left, ignore_right = 0, 0
 # Open webcam
 cap = cv2.VideoCapture(0)
+
+FRAME_WIDTH = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))   # int `width`
+FRAME_HEIGHT = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))  # int `height`
+CHALLENGE_START_SIZE = 50
+
+collisionObserver = CollisionObserver()
+challengeManager = ChallengeManager()
+eventManager = EventManager()
+eventManager.addEvent("generatePunchChallenge", 50,
+                      challengeManager.generatePunchChallenge,
+                      ["frameWidth", "frameHeight", "startSize", "observer"])
+eventManager.addEvent("update_challenges", 4,
+                      challengeManager.update_challenges, ["landmarks"])
+
+drawManager = EventManager()
+drawManager.addEvent("draw_challenges", 1,
+                     challengeManager.drawChallenges, ["frame"])
+drawManager.addEvent(
+    "display_collisions", 1, collisionObserver.drawCollisionCount, ["frame"])
+context = {
+    "frameWidth": FRAME_WIDTH,
+    "frameHeight": FRAME_HEIGHT,
+    "startSize": CHALLENGE_START_SIZE,
+    "observer": collisionObserver
+}
 
 duration = 100
 start_time = datetime.now()
@@ -137,6 +166,14 @@ while cap.isOpened():
                 punchanimation.trigger(right_hand_position)
                 game_ui.increment_score()
                 game_ui.clear_command()
+        
+        elif current_command == "Dodge":
+            context["frame"] = frame
+            context["landmarks"] = results.pose_landmarks
+
+            eventManager.update(context)
+            drawManager.update(context)
+            
                 
 
     # Display the game UI (commands and score)
