@@ -23,6 +23,10 @@ class GameUI:
     def increment_score(self):
         """Increment the player's score."""
         self.score += 1
+    
+    def decrement_score(self):
+        """Decrement the player's score."""
+        self.score -= 1
 
     def display(self, frame):
         """Display the current command and score on the screen."""

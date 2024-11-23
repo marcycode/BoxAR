@@ -37,7 +37,7 @@ CHALLENGE_START_SIZE = 50
 collisionObserver = CollisionObserver()
 challengeManager = ChallengeManager()
 eventManager = EventManager()
-eventManager.addEvent("generatePunchChallenge", 50,
+eventManager.addEvent("generatePunchChallenge", 100,
                       challengeManager.generatePunchChallenge,
                       ["frameWidth", "frameHeight", "startSize", "observer"])
 eventManager.addEvent("update_challenges", 4,
@@ -46,8 +46,6 @@ eventManager.addEvent("update_challenges", 4,
 drawManager = EventManager()
 drawManager.addEvent("draw_challenges", 1,
                      challengeManager.drawChallenges, ["frame"])
-drawManager.addEvent(
-    "display_collisions", 1, collisionObserver.drawCollisionCount, ["frame"])
 context = {
     "frameWidth": FRAME_WIDTH,
     "frameHeight": FRAME_HEIGHT,
@@ -180,8 +178,11 @@ while cap.isOpened():
                 game_ui.increment_score()
                 game_ui.clear_command()
 
+    collisions = collisionObserver.getCollisionCount()
     eventManager.update(context)
     drawManager.update(context)
+    if collisions >= collisionObserver.getCollisionCount() - 1:
+        game_ui.decrement_score()
 
     # Display the game UI (commands and score)
     frame = punchanimation.draw(frame)
