@@ -1,5 +1,11 @@
 backend/env
 backend/venv
 db/chroma
-
 __pycache__
+__pycache__/
+oop/__pycache__/
+.vscode
+.vscode/
+
+boxAR-frontend/node_modules
+boxAR-frontend/package-lock.json
