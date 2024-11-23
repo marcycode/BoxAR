@@ -1,9 +1,8 @@
 import cv2
 import mediapipe as mp
 import time
-import math
-from collections import deque
 from PunchDetector import PunchDetector
+from Speed import Speed
 
 QUEUE_SIZE = 5
 # Initialize MediaPipe Pose
@@ -12,24 +11,9 @@ pose = mp_pose.Pose()
 mp_drawing = mp.solutions.drawing_utils
 
 pd = PunchDetector()
-
+speed = Speed(QUEUE_SIZE)
 # Open webcam
 cap = cv2.VideoCapture(0)
-
-# Variables to track wrist positions and time
-prev_time = 0
-right_prev_wrist_position = None
-left_prev_wrist_position = None
-right_speeds = deque(maxlen=QUEUE_SIZE)
-left_speeds = deque(maxlen=QUEUE_SIZE)
-for i in range(QUEUE_SIZE):
-    right_speeds.append(0)
-    left_speeds.append(0)
-
-def calculate_distance(point1, point2):
-    """Calculate Euclidean distance between two points."""
-    dist = math.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
-    return dist if point1[0] >= point2[0] else -dist
 
 while cap.isOpened():
     ret, frame = cap.read()
@@ -60,58 +44,46 @@ while cap.isOpened():
         right_wrist_position = (right_wrist.x * frame.shape[1], right_wrist.y * frame.shape[0])
         left_wrist_position = (left_wrist.x * frame.shape[1], left_wrist.y * frame.shape[0])
 
+        right_hand = results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_INDEX]
+        left_hand = results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_INDEX]
+        right_hand_position = (right_hand.x * frame.shape[1], right_hand.y * frame.shape[0])
+        left_hand_position = (left_hand.x * frame.shape[1], left_hand.y * frame.shape[0])
 
-        # If a previous wrist position exists, calculate speed
-        if right_prev_wrist_position is not None and left_prev_wrist_position is not None:
-            # Calculate displacement
-            right_displacement = calculate_distance(right_wrist_position, right_prev_wrist_position)
-            left_displacement = calculate_distance(left_wrist_position, left_prev_wrist_position)
+        right_average, right_average_y, left_average, left_average_y = speed.calculate_speeds(current_time, right_wrist_position, left_wrist_position, right_hand_position, left_hand_position)
 
-            # Calculate time difference
-            time_diff = current_time - prev_time
+        # Display the speed on the video frame
+        # cv2.putText(frame, f"Right Speed: {right_speed:.2f} px/s", (50, 50),
+        #             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        # cv2.putText(frame, f"Left Speed: {speed.left_speed_y:.2f} px/s", (50, 50),
+        #             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        
+        right_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
+        right_elbow = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value]
+        left_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
+        left_elbow = landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value]
+        nose = landmarks[mp_pose.PoseLandmark.NOSE.value]
 
-            # Calculate speed (pixels per second)
-            if time_diff > 0:  # Avoid division by zero
-                right_speed = right_displacement / time_diff
-                left_speed = left_displacement / time_diff
-                right_speeds.append(right_speed)
-                left_speeds.append(left_speed)
-                right_average = sum(right_speeds) / len(right_speeds)
-                left_average = sum(left_speeds) / len(left_speeds)
-                
+        left_jab, right_jab = pd.detect_jab(left_wrist, left_shoulder, left_elbow, 
+                                                right_wrist, right_shoulder, right_elbow)
+        left_cross, right_cross = pd.detect_cross(nose, left_wrist, left_shoulder, left_elbow, 
+                                                right_wrist, right_shoulder, right_elbow)
+        left_uppercut, right_uppercut = pd.detect_uppercut(nose, left_wrist, left_shoulder, left_elbow, 
+                                                right_wrist, right_shoulder, right_elbow)
 
-                # Display the speed on the video frame
-                # cv2.putText(frame, f"Right Speed: {right_speed:.2f} px/s", (50, 50),
-                #             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                # cv2.putText(frame, f"Left Speed: {left_speed:.2f} px/s", (50, 50),
-                #             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                
-                right_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
-                right_elbow = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value]
-                left_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
-                left_elbow = landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value]
-                nose = landmarks[mp_pose.PoseLandmark.NOSE.value]
-
-                left_jab, right_jab = pd.detect_jab(left_wrist, left_shoulder, left_elbow, 
-                                                        right_wrist, right_shoulder, right_elbow)
-                left_cross, right_cross = pd.detect_cross(nose, left_wrist, left_shoulder, left_elbow, 
-                                                        right_wrist, right_shoulder, right_elbow)
-
-                if right_wrist.visibility > 0.98 and right_shoulder.visibility > 0.98 and right_elbow.visibility > 0.98:
-                    if right_average > 150 and right_jab:
-                        cv2.putText(frame, "RIGHT JAB!", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
-                    elif right_average < -150 and right_cross:
-                        cv2.putText(frame, "RIGHT CROSS!", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
-                if left_wrist.visibility > 0.98 and left_shoulder.visibility > 0.98 and left_elbow.visibility > 0.98:
-                    if left_average < -150 and left_jab:
-                        cv2.putText(frame, "LEFT JAB!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
-                    elif left_average > 150 and left_cross:
-                        cv2.putText(frame, "LEFT CROSS!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
-
-        # Update the previous wrist position and time
-        right_prev_wrist_position = right_wrist_position
-        left_prev_wrist_position = left_wrist_position
-        prev_time = current_time
+        if right_wrist.visibility > 0.98 and right_shoulder.visibility > 0.98 and right_elbow.visibility > 0.98:
+            if abs(right_average) > 120 and right_average_y < 0 and right_uppercut:
+                cv2.putText(frame, "RIGHT UPPERCUT!", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
+            elif right_average > 150 and right_jab:
+                cv2.putText(frame, "RIGHT JAB!", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
+            elif right_average < -150 and right_cross:
+                cv2.putText(frame, "RIGHT CROSS!", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
+        if left_wrist.visibility > 0.98 and left_shoulder.visibility > 0.98 and left_elbow.visibility > 0.98:
+            if abs(left_average_y) > 120 and left_average_y < 0 and left_uppercut:
+                cv2.putText(frame, "LEFT UPPERCUT!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
+            elif left_average < -150 and left_jab:
+                cv2.putText(frame, "LEFT JAB!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
+            elif left_average > 150 and left_cross:
+                cv2.putText(frame, "LEFT CROSS!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
 
     # Show the video frame
     cv2.imshow("Wrist Speed Tracking", frame)
