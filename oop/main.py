@@ -1,6 +1,6 @@
 import cv2
 import time
-from game_ui import GameUI
+from src.game_ui import GameUI
 from PunchDetector import PunchDetector
 
 def main():

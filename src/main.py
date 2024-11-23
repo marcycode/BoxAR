@@ -1,17 +1,19 @@
 import cv2
 import mediapipe as mp
 import time
+from game_ui import GameUI
 from PunchDetector import PunchDetector
-from Speed import Speed
+from sound_effect import SoundEffect
 
-QUEUE_SIZE = 5
-# Initialize MediaPipe Pose
+# Initialize components
 mp_pose = mp.solutions.pose
-pose = mp_pose.Pose()
+pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 mp_drawing = mp.solutions.drawing_utils
 
-pd = PunchDetector()
-speed = Speed(QUEUE_SIZE)
+game_ui = GameUI()
+punch_detector = PunchDetector()
+punch_sound = SoundEffect("sound/Punch.mp3", cooldown=1.0)  # Set a 1-second cooldown for the punch sound
+
 # Open webcam
 cap = cv2.VideoCapture(0)
 
@@ -21,15 +23,15 @@ while cap.isOpened():
         print("Error accessing the camera.")
         break
 
-    # Flip the frame and convert to RGB
+    # Flip the frame for a mirrored view
     frame = cv2.flip(frame, 1)
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
     # Process the frame with MediaPipe
     results = pose.process(rgb_frame)
 
-    # Get the current time
-    current_time = time.time()
+    # Update the game command
+    game_ui.update_command()
 
     if results.pose_landmarks:
         # Draw pose landmarks
@@ -37,46 +39,38 @@ while cap.isOpened():
 
         # Extract landmarks
         landmarks = results.pose_landmarks.landmark
+        left_wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
+        left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
+        left_elbow = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value]
 
-        # Get the right wrist coordinates
-        right_wrist = results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST]
-        left_wrist = results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST]
-        right_wrist_position = (right_wrist.x * frame.shape[1], right_wrist.y * frame.shape[0])
-        left_wrist_position = (left_wrist.x * frame.shape[1], left_wrist.y * frame.shape[0])
-
-        right_hand = results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_INDEX]
-        left_hand = results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_INDEX]
-        right_hand_position = (right_hand.x * frame.shape[1], right_hand.y * frame.shape[0])
-        left_hand_position = (left_hand.x * frame.shape[1], left_hand.y * frame.shape[0])
-
-        right_average, right_average_y, left_average, left_average_y = speed.calculate_speeds(current_time, right_wrist_position, left_wrist_position, right_hand_position, left_hand_position)
-        
-        right_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
-        right_elbow = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value]
-        left_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
-        left_elbow = landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value]
+        right_wrist = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value]
+        right_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
+        right_elbow = landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value]
         nose = landmarks[mp_pose.PoseLandmark.NOSE.value]
 
-        left_jab, right_jab = pd.detect_jab(left_wrist, left_shoulder, left_elbow, 
-                                                right_wrist, right_shoulder, right_elbow)
-        left_cross, right_cross = pd.detect_cross(nose, left_wrist, left_shoulder, left_elbow, 
-                                                right_wrist, right_shoulder, right_elbow)
-        # left_uppercut, right_uppercut = pd.detect_uppercut(nose, left_wrist, left_shoulder, left_elbow, 
-        #                                         right_wrist, right_shoulder, right_elbow)
+        # Detect punches
+        left_jab, right_jab = punch_detector.detect_jab(left_wrist, left_shoulder, left_elbow,
+                                                        right_wrist, right_shoulder, right_elbow)
+        left_cross, right_cross = punch_detector.detect_cross(nose, left_wrist, left_shoulder, left_elbow,
+                                                              right_wrist, right_shoulder, right_elbow)
+        left_uppercut, right_uppercut = punch_detector.detect_uppercut(nose, left_wrist, left_shoulder, left_elbow,
+                                                                        right_wrist, right_shoulder, right_elbow)
 
-        if right_wrist.visibility > 0.98 and right_shoulder.visibility > 0.98 and right_elbow.visibility > 0.98:
-            if right_average > 150 and right_jab:
-                cv2.putText(frame, "RIGHT JAB!", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
-            elif right_average < -150 and right_cross:
-                cv2.putText(frame, "RIGHT CROSS!", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
-        if left_wrist.visibility > 0.98 and left_shoulder.visibility > 0.98 and left_elbow.visibility > 0.98:
-            if left_average < -150 and left_jab:
-                cv2.putText(frame, "LEFT JAB!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
-            elif left_average > 150 and left_cross:
-                cv2.putText(frame, "LEFT CROSS!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
+        # Check for correct punches based on the current command
+        current_command = game_ui.current_command
+        if current_command == "Left Jab" and left_jab:
+            if punch_sound.play():  # Play sound with cooldown
+                game_ui.increment_score()
+                game_ui.clear_command()
+        elif current_command == "Right Jab" and right_jab:
+            if punch_sound.play():  # Play sound with cooldown
+                game_ui.increment_score()
+                game_ui.clear_command()
+    # Display the game UI (commands and score)
+    frame = game_ui.display(frame)
 
-    # Show the video frame
-    cv2.imshow("PunchAR", frame)
+    # Show the video feed
+    cv2.imshow("Punch Detection Game", frame)
 
     # Exit on pressing 'q'
     if cv2.waitKey(1) & 0xFF == ord('q'):
