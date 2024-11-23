@@ -3,7 +3,7 @@ import math
 
 class PunchDetector(object):
     VISIBILITY = 0.99
-    SPEED = 300
+    SPEED = 150
 
     def __new__(cls):
         if not hasattr(cls, 'instance'):
