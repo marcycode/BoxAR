@@ -1,4 +1,4 @@
-# blaizian
+# BoxAR
 
 # Conda environment setup
 
@@ -15,4 +15,3 @@ This will create a new environment called `boxar` with all the necessary depende
 ```bash
 conda activate boxar
 ```
-
