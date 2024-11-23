@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 from challenge import ChallengeManager
 from update_hook import EventManager
+from observer import CollisionObserver
 # initialize Pose estimator
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
@@ -19,27 +20,32 @@ FRAME_HEIGHT = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))  # int `height`
 CHALLENGE_START_SIZE = 50
 counter = 0
 
+collisionObserver = CollisionObserver()
+
 challengeManager = ChallengeManager()
 eventManager = EventManager()
 eventManager.addEvent("generatePunchChallenge", 50,
                       challengeManager.generatePunchChallenge,
-                      ["frameWidth", "frameHeight", "startSize"])
-eventManager.addEvent("update_challenges", 1,
-                      challengeManager.update_challenges)
+                      ["frameWidth", "frameHeight", "startSize", "observer"])
+eventManager.addEvent("update_challenges", 4,
+                      challengeManager.update_challenges, ["landmarks"])
 
 drawManager = EventManager()
 drawManager.addEvent("draw_challenges", 1,
-                     challengeManager.draw_challenges, ["frame"])
-
+                     challengeManager.drawChallenges, ["frame"])
+drawManager.addEvent(
+    "display_collisions", 1, collisionObserver.drawCollisionCount, ["frame"])
 context = {
     "frameWidth": FRAME_WIDTH,
     "frameHeight": FRAME_HEIGHT,
-    "startSize": CHALLENGE_START_SIZE
+    "startSize": CHALLENGE_START_SIZE,
+    "observer": collisionObserver
 }
 
 while cap.isOpened():
     # read frame from capture object
     _, frame = cap.read()
+    cv2.flip(frame, 1, frame)
 
     try:
         # convert the frame to RGB format

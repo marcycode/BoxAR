@@ -2,6 +2,8 @@ import random
 import cv2
 import numpy as np
 
+from collision_detection import hitCriticalMass
+
 
 class Challenge():
     def __init__(self, name, image, observer=None):
@@ -23,14 +25,13 @@ class PunchChallenge(Challenge):
         self.timeToLive = timeToLive
         self.growthRate = ((self.END_SIZE - startSize) // timeToLive) + 1
 
-    def update(self):
+    def update(self, landmarks):
         self.size += self.growthRate
         self.image = cv2.resize(PunchChallenge.BASE_IMG,
                                 (self.size, self.size))
         self.timeToLive -= 1
         if self.timeToLive == 0:
-            if self.observer:
-                self.observer.notify(self)
+            self.checkCollision(landmarks)
             self.expired = True
 
     def overlayChallenge(self, frame):
@@ -51,14 +52,26 @@ class PunchChallenge(Challenge):
         cv2.circle(frame, (x, y), (PunchChallenge.END_SIZE - 10) //
                    2, (0, 0, 255), 2)
 
+    def checkCollision(self, landmarks):
+        if hitCriticalMass(landmarks, (self.x, self.y), self.size // 2):
+            self.expired = True
+            if self.observer:
+                self.observer.notify(self)
+
 
 class ChallengeManager():
     def __init__(self):
         self.challenges: list[PunchChallenge] = []
 
-    def update_challenges(self):
+    def update_challenges(self, landmarks):
+        # Get value field from protobuf
+        if landmarks and landmarks.landmark:
+            landmarks = landmarks.landmark
+        else:
+            print(f"Warning: Challenge {self} did not receive landmarks")
+            return
         for challenge in self.challenges:
-            challenge.update()
+            challenge.update(landmarks)
             if challenge.expired:
                 self.challenges.remove(challenge)
         # handle collisions
@@ -72,6 +85,10 @@ class ChallengeManager():
         self.challenges.append(challenge)
         return challenge
 
-    def draw_challenges(self, frame):
+    def drawChallenges(self, frame):
         for challenge in self.challenges:
             challenge.overlayChallenge(frame)
+
+    def checkCollision(self, landmarks):
+        for challenge in self.challenges:
+            challenge.checkCollision(landmarks)
