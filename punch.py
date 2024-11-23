@@ -92,10 +92,10 @@ while cap.isOpened():
                 left_elbow = landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value]
                 nose = landmarks[mp_pose.PoseLandmark.NOSE.value]
 
-                left_jab, right_jab = pd.detect_jab(left_wrist.x, left_shoulder.x, left_elbow.x, 
-                                                        right_wrist.x, right_shoulder.x, right_elbow.x)
-                left_cross, right_cross = pd.detect_cross(nose.x, left_wrist.x, left_shoulder.x, left_elbow.x, 
-                                                        right_wrist.x, right_shoulder.x, right_elbow.x)
+                left_jab, right_jab = pd.detect_jab(left_wrist, left_shoulder, left_elbow, 
+                                                        right_wrist, right_shoulder, right_elbow)
+                left_cross, right_cross = pd.detect_cross(nose, left_wrist, left_shoulder, left_elbow, 
+                                                        right_wrist, right_shoulder, right_elbow)
 
                 if right_wrist.visibility > 0.98 and right_shoulder.visibility > 0.98 and right_elbow.visibility > 0.98:
                     if right_average > 150 and right_jab:
