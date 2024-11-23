@@ -18,7 +18,6 @@ punch_detector = PunchDetector()
 speed = Speed(QUEUE_SIZE)
 punch_sound = SoundEffect("sound/Punch.mp3", cooldown=1.0)  # Set a 1-second cooldown for the punch sound
 ignore_left, ignore_right = 0, 0
-prev_left, prev_right = -1, -1
 # Open webcam
 cap = cv2.VideoCapture(0)
 
@@ -73,9 +72,6 @@ while cap.isOpened():
         # Detect punches
         left_jab, right_jab = punch_detector.detect_jab(left_wrist, left_shoulder, left_average,
                                                         right_wrist, right_shoulder, right_average)
-        
-
-        print(right_average)
 
         # Check for correct punches based on the current command
         current_command = game_ui.current_command
@@ -84,7 +80,7 @@ while cap.isOpened():
             if punch_sound.play():  # Play sound with cooldown
                 game_ui.increment_score()
                 game_ui.clear_command()
-        elif current_command == "Right Jab" and right_jab and left_hand.z < prev_left - 0.2 and not ignore_right:
+        elif current_command == "Right Jab" and right_jab and not ignore_right:
             ignore_right += 1
             if punch_sound.play():  # Play sound with cooldown
                 game_ui.increment_score()
