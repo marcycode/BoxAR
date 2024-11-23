@@ -24,7 +24,7 @@ def detect_jab(landmarks):
     # Detect a "jab" motion
     print(left_wrist, left_shoulder)
     print(right_wrist, right_shoulder)
-    left_jab = left_wrist.x > left_shoulder.x + 0.1  # Left jab threshold
+    left_jab = left_wrist.x > left_shoulder.x  # Left jab threshold
     right_jab = right_wrist.x < right_shoulder.x - 0.1  # Right jab threshold
 
     return right_jab, left_jab
