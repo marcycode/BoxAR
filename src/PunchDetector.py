@@ -2,6 +2,7 @@ from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmark
 import math
 
 class PunchDetector(object):
+    VISIBILITY = 0.99
 
     def __new__(cls):
         if not hasattr(cls, 'instance'):
@@ -32,17 +33,16 @@ class PunchDetector(object):
         angle = math.acos(dot_product / (magnitude1 * magnitude2))
         return math.degrees(angle)  # Convert to degrees
 
-    def detect_jab(self, leftWrist: NormalizedLandmark, leftShoulder: NormalizedLandmark,
-                        leftElbow: NormalizedLandmark, rightWrist: NormalizedLandmark,
-                        rightShoulder: NormalizedLandmark, rightElbow: NormalizedLandmark) -> tuple[bool]: # (bool, bool)
+    def detect_jab(self, leftWrist: NormalizedLandmark, leftShoulder: NormalizedLandmark, 
+                    rightWrist: NormalizedLandmark, rightShoulder: NormalizedLandmark) -> tuple[bool]: # (bool, bool)
         """
         Simple logic to detect a jab: 
-        Checks if the wrist moves forward (in the x-axis) relative to the shoulder and elbow.
+        Checks if the wrist moves forward (in the x-axis) relative to the shoulder.
         """
         # leftAngle = self.calculate_angle(leftShoulder, leftElbow, leftWrist)
         # rightAngle = self.calculate_angle(rightShoulder, rightElbow, rightWrist)
-        leftJab = leftWrist.x < leftShoulder.x + 0.1 and leftWrist.x < leftElbow.x + 0.1
-        rightJab = rightWrist.x > rightShoulder.x - 0.1 and rightWrist.x > rightElbow.x - 0.1
+        leftJab = leftWrist.x > leftShoulder.x - 0.1 and leftWrist.visibility > self.VISIBILITY and leftShoulder.visibility > self.VISIBILITY
+        rightJab = rightWrist.x < rightShoulder.x + 0.1 and rightWrist.visibility > self.VISIBILITY and rightShoulder.visibility > self.VISIBILITY
         return (leftJab, rightJab)
     
     def detect_cross(self, nose: NormalizedLandmark, leftWrist: NormalizedLandmark, leftShoulder: NormalizedLandmark,
@@ -54,10 +54,10 @@ class PunchDetector(object):
         """
         # leftAngle = self.calculate_angle(leftShoulder, leftElbow, leftWrist)
         # rightAngle = self.calculate_angle(rightShoulder, rightElbow, rightWrist)
-        leftCross = leftWrist.x > leftElbow.x and leftWrist.x > nose.x - 0.05 and leftElbow.x > leftShoulder.x - 0.05
-        rightCross = rightWrist.x < rightElbow.x and rightWrist.x < nose.x + 0.05 and rightElbow.x < rightShoulder.x + 0.05
+        leftCross = leftWrist.x > nose.x - 0.075 and leftWrist.x < rightShoulder.x + 0.1
+        rightCross = rightWrist.x < nose.x + 0.075 and rightWrist.x > leftShoulder.x - 0.1
         return (leftCross, rightCross)
-    
+
     def detect_uppercut(self, nose: NormalizedLandmark, leftWrist: NormalizedLandmark, leftShoulder: NormalizedLandmark,
                         leftElbow: NormalizedLandmark, rightWrist: NormalizedLandmark,
                         rightShoulder: NormalizedLandmark, rightElbow: NormalizedLandmark) -> tuple[bool]: # (bool, bool)

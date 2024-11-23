@@ -4,7 +4,9 @@ import time
 from game_ui import GameUI
 from PunchDetector import PunchDetector
 from sound_effect import SoundEffect
+from Speed import Speed
 
+QUEUE_SIZE = 5
 # Initialize components
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
@@ -12,6 +14,7 @@ mp_drawing = mp.solutions.drawing_utils
 
 game_ui = GameUI()
 punch_detector = PunchDetector()
+speed = Speed(QUEUE_SIZE)
 punch_sound = SoundEffect("sound/Punch.mp3", cooldown=1.0)  # Set a 1-second cooldown for the punch sound
 
 # Open webcam
@@ -33,6 +36,9 @@ while cap.isOpened():
     # Update the game command
     game_ui.update_command()
 
+    # Get the current time
+    current_time = time.time()
+
     if results.pose_landmarks:
         # Draw pose landmarks
         mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
@@ -48,21 +54,22 @@ while cap.isOpened():
         right_elbow = landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value]
         nose = landmarks[mp_pose.PoseLandmark.NOSE.value]
 
+        right_wrist_position = (right_wrist.x * frame.shape[1], right_wrist.y * frame.shape[0])
+        left_wrist_position = (left_wrist.x * frame.shape[1], left_wrist.y * frame.shape[0])
+
         # Detect punches
-        left_jab, right_jab = punch_detector.detect_jab(left_wrist, left_shoulder, left_elbow,
-                                                        right_wrist, right_shoulder, right_elbow)
-        left_cross, right_cross = punch_detector.detect_cross(nose, left_wrist, left_shoulder, left_elbow,
-                                                              right_wrist, right_shoulder, right_elbow)
-        left_uppercut, right_uppercut = punch_detector.detect_uppercut(nose, left_wrist, left_shoulder, left_elbow,
-                                                                        right_wrist, right_shoulder, right_elbow)
+        left_jab, right_jab = punch_detector.detect_jab(left_wrist, left_shoulder,
+                                                        right_wrist, right_shoulder)
+        
+        right_average, left_average = speed.calculate_speeds(current_time, right_wrist_position, left_wrist_position)
 
         # Check for correct punches based on the current command
         current_command = game_ui.current_command
-        if current_command == "Left Jab" and left_jab:
+        if current_command == "Left Jab" and left_jab and right_average > 150:
             if punch_sound.play():  # Play sound with cooldown
                 game_ui.increment_score()
                 game_ui.clear_command()
-        elif current_command == "Right Jab" and right_jab:
+        elif current_command == "Right Jab" and right_jab and left_average > 150:
             if punch_sound.play():  # Play sound with cooldown
                 game_ui.increment_score()
                 game_ui.clear_command()
