@@ -6,6 +6,7 @@ import NavBar from "./components/navbar.tsx";
 
 / * IMPORT PAGES * /;
 import Play from "@/pages/Play.tsx";
+import Leaderboard from "./pages/Leaderboard.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
@@ -13,6 +14,7 @@ createRoot(document.getElementById("root")!).render(
     <Routes>
       <Route path="/" element={<App />} />
       <Route path="/play" element={<Play />} />
+      <Route path="/leaderboard" element={<Leaderboard />} />
     </Routes>
   </BrowserRouter>
 );
