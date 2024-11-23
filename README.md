@@ -27,3 +27,8 @@ This will create a new environment called `boxar` with all the necessary depende
 ```bash
 conda activate boxar
 ```
+
+## Running Steps
+
+- navigate to `boxAR-frontend` and run `npm run dev`
+- in the main directory, run `flask run --port 8000`
