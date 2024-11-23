@@ -44,9 +44,6 @@ class PunchChallenge(Challenge):
         self.image = cv2.resize(PunchChallenge.BASE_IMG,
                                 (size, size))
         adjustmentPixel = 1 if size % 2 != 0 else 0
-        print(np.shape(frame[y - size // 2: y + size //
-                             2, x - size // 2: x + size // 2]))
-        print(np.shape(self.image))
         frame[y - size // 2: y + size // 2 + adjustmentPixel, x - size // 2: x + size // 2 + adjustmentPixel] = cv2.addWeighted(
             frame[y - size // 2: y + size // 2 + adjustmentPixel, x - size // 2: x + size // 2 + adjustmentPixel], 1.0, self.image, 1.0, 1)
 
