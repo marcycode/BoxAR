@@ -9,6 +9,7 @@ class Speed:
         self.left_prev_wrist_position = None
         self.right_speeds = deque(maxlen=maxSize)
         self.left_speeds = deque(maxlen=maxSize)
+        self.prev_left, self.prev_right = None, None
         for _ in range(maxSize):
             self.right_speeds.append(0)
             self.left_speeds.append(0)
@@ -46,4 +47,26 @@ class Speed:
         self.left_prev_wrist_position = left_wrist_position
         self.prev_time = current_time
         
+        return right_average, left_average
+
+    def calculate_speed_towards_camera(self, current_time, right_hand, left_hand):
+        right_average, left_average= 0, 0
+        # If a previous wrist position exists, calculate speed
+        if self.right_prev_wrist_position is not None and self.left_prev_wrist_position is not None:
+            right = right_hand - self.prev_right
+            left = left_hand - self.prev_left
+            time_diff = current_time - self.prev_time
+
+            # Calculate speed (pixels per second)
+            if time_diff > 0:  # Avoid division by zero
+                right_speed = right / time_diff
+                left_speed = left / time_diff
+                self.right_speeds.append(right_speed)
+                self.left_speeds.append(left_speed)
+                right_average = sum(self.right_speeds) / len(self.right_speeds)
+                left_average = sum(self.left_speeds) / len(self.left_speeds)
+
+        self.prev_left, self.prev_right = left_hand.z, right_hand.z
+        self.prev_time = current_time
+
         return right_average, left_average

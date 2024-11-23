@@ -3,6 +3,7 @@ import math
 
 class PunchDetector(object):
     VISIBILITY = 0.99
+    SPEED = 40
 
     def __new__(cls):
         if not hasattr(cls, 'instance'):
@@ -33,16 +34,16 @@ class PunchDetector(object):
         angle = math.acos(dot_product / (magnitude1 * magnitude2))
         return math.degrees(angle)  # Convert to degrees
 
-    def detect_jab(self, leftWrist: NormalizedLandmark, leftShoulder: NormalizedLandmark, 
-                    rightWrist: NormalizedLandmark, rightShoulder: NormalizedLandmark) -> tuple[bool]: # (bool, bool)
+    def detect_jab(self, leftWrist: NormalizedLandmark, leftShoulder: NormalizedLandmark, leftSpeed, 
+                    rightWrist: NormalizedLandmark, rightShoulder: NormalizedLandmark, rightSpeed) -> tuple[bool]: # (bool, bool)
         """
         Simple logic to detect a jab: 
         Checks if the wrist moves forward (in the x-axis) relative to the shoulder.
         """
         # leftAngle = self.calculate_angle(leftShoulder, leftElbow, leftWrist)
         # rightAngle = self.calculate_angle(rightShoulder, rightElbow, rightWrist)
-        leftJab = leftWrist.x > leftShoulder.x - 0.1 and leftWrist.visibility > self.VISIBILITY and leftShoulder.visibility > self.VISIBILITY
-        rightJab = rightWrist.x < rightShoulder.x + 0.1 and rightWrist.visibility > self.VISIBILITY and rightShoulder.visibility > self.VISIBILITY
+        leftJab = leftWrist.x > leftShoulder.x - 0.1 and leftWrist.visibility > self.VISIBILITY and leftShoulder.visibility > self.VISIBILITY and leftSpeed > self.SPEED
+        rightJab = rightWrist.x < rightShoulder.x + 0.1 and rightWrist.visibility > self.VISIBILITY and rightShoulder.visibility > self.VISIBILITY and rightSpeed > self.SPEED
         return (leftJab, rightJab)
     
     def detect_cross(self, nose: NormalizedLandmark, leftWrist: NormalizedLandmark, leftShoulder: NormalizedLandmark,
