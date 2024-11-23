@@ -5,6 +5,7 @@ from game_ui import GameUI
 from PunchDetector import PunchDetector
 from sound_effect import SoundEffect
 from Speed import Speed
+from datetime import datetime
 
 QUEUE_SIZE = 10
 COOLDOWN = 0
@@ -21,6 +22,9 @@ ignore_left, ignore_right = 0, 0
 # Open webcam
 cap = cv2.VideoCapture(0)
 
+duration = 5
+start_time = datetime.now()
+
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
@@ -33,6 +37,46 @@ while cap.isOpened():
 
     # Process the frame with MediaPipe
     results = pose.process(rgb_frame)
+
+    # Get time and show timer
+    active_time = duration - (datetime.now() - start_time).seconds  # converting into seconds
+
+    if active_time > 0:
+        cv2.putText(
+            frame,
+            str(active_time),
+            (frame.shape[1] - 100, 50),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            2,
+            (0, 0, 0),
+            3,
+        )
+    else:
+        # Define the text
+        text = "GAME OVER!"
+
+        # Font settings
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 3
+        color = (0, 0, 225)  # Red color
+        thickness = 5
+
+        # Get text size
+        (text_width, text_height), baseline = cv2.getTextSize(text, font, font_scale, thickness)
+
+        # Calculate the position for the text to appear in the center
+        frame_height, frame_width, _ = frame.shape
+        x = (frame_width - text_width) // 2
+        y = (frame_height + text_height) // 2
+        cv2.putText(
+            frame,
+            text,
+            (x + 2, y + 2),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            font_scale,
+            color,
+            thickness,
+        )
 
     # Update the game command
     game_ui.update_command()
