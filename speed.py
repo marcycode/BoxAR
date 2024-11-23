@@ -59,6 +59,10 @@ while cap.isOpened():
                 cv2.putText(frame, f"Speed: {speed:.2f} px/s", (50, 50),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
+                if speed > 150:
+                    cv2.putText(frame, "PUNCH!", (100, 150), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
+
+
         # Update the previous wrist position and time
         prev_wrist_position = wrist_position
         prev_time = current_time
