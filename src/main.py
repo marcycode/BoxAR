@@ -8,7 +8,7 @@ from Speed import Speed
 from datetime import datetime
 from punchanimation import PunchAnimation
 
-punchanimation = PunchAnimation()
+punchanimation = PunchAnimation("assets/punchanimation.gif")
 
 QUEUE_SIZE = 10
 COOLDOWN = 0
@@ -127,19 +127,22 @@ while cap.isOpened():
         if current_command == "Left Jab" and left_jab and not ignore_left:
             ignore_left += 1
             if punch_sound.play():  # Play sound with cooldown
-                punchanimation.draw(frame, left_hand_position)
+                punchanimation.trigger(left_hand_position)
                 game_ui.increment_score()
                 game_ui.clear_command()
                 
         elif current_command == "Right Jab" and right_jab and not ignore_right:
             ignore_right += 1
             if punch_sound.play():  # Play sound with cooldown
-                punchanimation.draw(frame, right_hand_position)
+                punchanimation.trigger(right_hand_position)
                 game_ui.increment_score()
                 game_ui.clear_command()
                 
 
     # Display the game UI (commands and score)
+    frame = punchanimation.draw(frame)
+
+    
     frame = game_ui.display(frame)
 
     # Show the video feed
