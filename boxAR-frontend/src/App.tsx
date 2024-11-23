@@ -1,16 +1,18 @@
-import "./App.css";
+import logoDark from "@/assets/boxar-logo-dark.png";
+//import logoLight from "@/assets/boxer-logo-light.png";
 
 function App() {
   return (
     <>
-      <div>test</div>
-      <h1>Vite + React</h1>
-      <div>
-        <img
-          src="http://localhost:8000/video_feed?page_width=1980&page_height=1080"
-          alt="Video"
-        />
+      <div className="flex flex-col w-[100vw] justify-center items-center text-center">
+        <img src={logoDark} alt="BoxAR Logo" width={"30%"} height={"30%"} />
+        <span className="mt-4 text-xl md:text-3xl">
+          <b>
+            Shadow boxing taken to the <i>next level</i>
+          </b>
+        </span>
       </div>
+      <div></div>
     </>
   );
 }

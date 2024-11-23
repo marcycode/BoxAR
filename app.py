@@ -16,8 +16,8 @@ def gen(camera):
         yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n\r\n")
 
 
-@app.route("/video_feed")
-def video_feed():
+@app.route("/boxing_feed")
+def boxing_feed():
     page_width = int(request.args.get("page_width"))
     page_height = int(request.args.get("page_height"))
     response = Response(

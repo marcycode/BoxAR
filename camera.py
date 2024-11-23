@@ -56,8 +56,9 @@ def detectBlock(landmarks):
 class VideoCamera(object):
     def __init__(self, page_width, page_height):
         self.video = cv2.VideoCapture(1)
-        self.video.set(3, page_width / 2)  # 3 -> WIDTH
-        self.video.set(4, page_height / 2)  # 4 -> HEIGHT
+        # FIX BELOW
+        self.video.set(3, page_width / 1.75)  # 3 -> WIDTH
+        self.video.set(4, page_height / 1.75)  # 4 -> HEIGHT
 
     def __del__(self):
         self.video.release()
