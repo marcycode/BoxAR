@@ -3,6 +3,7 @@ import mediapipe as mp
 import time
 import math
 from datetime import datetime
+from cv2constants import CV_VIDEO_CAPTURE_DEVICE
 
 # Initialize MediaPipe Pose
 mp_pose = mp.solutions.pose
@@ -14,7 +15,7 @@ duration = 30
 start_time = datetime.now()
 
 # Open webcam
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(CV_VIDEO_CAPTURE_DEVICE)
 
 # Variables to track wrist positions and time
 prev_time = 0
@@ -37,7 +38,8 @@ while cap.isOpened():
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
     # Get time and show timer
-    active_time = 30 - (datetime.now() - start_time).seconds  # converting into seconds
+    # converting into seconds
+    active_time = 30 - (datetime.now() - start_time).seconds
 
     if active_time > 0:
         cv2.putText(
@@ -79,7 +81,8 @@ while cap.isOpened():
         # If a previous wrist position exists, calculate speed
         if prev_wrist_position is not None:
             # Calculate displacement
-            displacement = calculate_distance(wrist_position, prev_wrist_position)
+            displacement = calculate_distance(
+                wrist_position, prev_wrist_position)
 
             # Calculate time difference
             time_diff = current_time - prev_time

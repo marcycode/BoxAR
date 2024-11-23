@@ -1,5 +1,6 @@
 import cv2
 import mediapipe as mp
+from cv2constants import CV_VIDEO_CAPTURE_DEVICE
 
 # initialize Pose estimator
 mp_drawing = mp.solutions.drawing_utils
@@ -11,7 +12,7 @@ pose = mp_pose.Pose(
 mp_hands = mp.solutions.hands.Hands()
 
 # create capture object
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(CV_VIDEO_CAPTURE_DEVICE)
 counter = 0
 while cap.isOpened():
     # read frame from capture object

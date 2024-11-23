@@ -1,6 +1,7 @@
 import cv2
 import mediapipe as mp
 import math
+from cv2constants import CV_VIDEO_CAPTURE_DEVICE
 
 # Initialize MediaPipe pose detection
 mp_pose = mp.solutions.pose
@@ -8,7 +9,8 @@ pose = mp_pose.Pose()
 mp_drawing = mp.solutions.drawing_utils
 
 # Open webcam
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(CV_VIDEO_CAPTURE_DEVICE)
+
 
 def calculate_angle(point1, point2, point3):
     """
@@ -33,6 +35,7 @@ def calculate_angle(point1, point2, point3):
 
     angle = math.acos(dot_product / (magnitude1 * magnitude2))
     return math.degrees(angle)  # Convert to degrees
+
 
 while cap.isOpened():
     ret, frame = cap.read()
@@ -66,17 +69,20 @@ while cap.isOpened():
         right_elbow = landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value]
         right_wrist = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value]
 
-        right_arm_angle = calculate_angle(right_shoulder, right_elbow, right_wrist)
+        right_arm_angle = calculate_angle(
+            right_shoulder, right_elbow, right_wrist)
 
         # Flip the frame for a mirrored effect
         frame = cv2.flip(frame, 1)
 
         if 160 <= right_arm_angle <= 200:  # Allow some tolerance
-            cv2.putText(frame, "Right Arm is Straight", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            cv2.putText(frame, "Right Arm is Straight", (50, 100),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
         # Check if the arm is straight (angle close to 180 degrees)
         if 160 <= left_arm_angle <= 200:  # Allow some tolerance
-            cv2.putText(frame, "Left Arm is Straight", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            cv2.putText(frame, "Left Arm is Straight", (50, 50),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
     # Display the video feed
     cv2.imshow("Arm Straightness Detection", frame)

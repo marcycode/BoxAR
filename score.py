@@ -3,10 +3,12 @@ import mediapipe as mp
 import time
 import math
 from pygame import mixer
+from cv2constants import CV_VIDEO_CAPTURE_DEVICE
 
 # Initialize Pygame mixer for sound
 mixer.init()
-punch_sound = mixer.Sound("Punch.mp3")  # Replace 'punch.wav' with your sound file
+# Replace 'punch.wav' with your sound file
+punch_sound = mixer.Sound("Punch.mp3")
 
 # Initialize MediaPipe Pose
 mp_pose = mp.solutions.pose
@@ -14,7 +16,7 @@ pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 mp_drawing = mp.solutions.drawing_utils
 
 # Open webcam
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(CV_VIDEO_CAPTURE_DEVICE)
 cap.set(cv2.CAP_PROP_FPS, 30)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
@@ -23,12 +25,14 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
 new_score = 0
 prev_time = 0
-prev_wrist_position =4
+prev_wrist_position = 4
 punch_cooldown = 0.5  # Minimum time (seconds) between punch sounds
+
 
 def calculate_distance(point1, point2):
     """Calculate Euclidean distance between two points."""
     return math.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
+
 
 while cap.isOpened():
     ret, frame = cap.read()
@@ -50,7 +54,8 @@ while cap.isOpened():
 
     if results.pose_landmarks:
         # Draw pose landmarks
-        mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+        mp_drawing.draw_landmarks(
+            frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
 
         # Get the right wrist coordinates
         wrist = results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST]
@@ -58,7 +63,8 @@ while cap.isOpened():
 
         # If a previous wrist position exists, calculate speed
         if prev_wrist_position is not None:
-            displacement = calculate_distance(wrist_position, prev_wrist_position)
+            displacement = calculate_distance(
+                wrist_position, prev_wrist_position)
             time_diff = current_time - prev_time
 
             if time_diff > 0:  # Avoid division by zero
@@ -70,7 +76,8 @@ while cap.isOpened():
 
                 if speed > 150 and current_time - last_punch_time > punch_cooldown:
                     new_score += 1
-                    cv2.putText(frame, "PUNCH!", (100, 150), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
+                    cv2.putText(frame, "PUNCH!", (100, 150),
+                                cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
                     punch_sound.play()
                     last_punch_time = current_time
 
