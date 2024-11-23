@@ -41,8 +41,8 @@ class PunchDetector(object):
         """
         # leftAngle = self.calculate_angle(leftShoulder, leftElbow, leftWrist)
         # rightAngle = self.calculate_angle(rightShoulder, rightElbow, rightWrist)
-        leftJab = leftWrist.x < leftShoulder.x + 0.1 and leftWrist.x < leftElbow.x + 0.075
-        rightJab = rightWrist.x > rightShoulder.x - 0.1 and rightWrist.x > rightElbow.x - 0.075
+        leftJab = leftWrist.x < leftShoulder.x + 0.1 and leftWrist.x < leftElbow.x + 0.1
+        rightJab = rightWrist.x > rightShoulder.x - 0.1 and rightWrist.x > rightElbow.x - 0.1
         return (leftJab, rightJab)
     
     def detect_cross(self, nose: NormalizedLandmark, leftWrist: NormalizedLandmark, leftShoulder: NormalizedLandmark,
@@ -69,6 +69,4 @@ class PunchDetector(object):
         # rightAngle = self.calculate_angle(rightShoulder, rightElbow, rightWrist)
         leftUppercut = leftWrist.y < leftElbow.y and nose.y < leftWrist.y < nose.y + 0.15
         rightUppercut = rightWrist.y < rightElbow.y and nose.y< rightWrist.y < nose.y + 0.15
-        if leftUppercut:
-            print(nose.y, leftWrist.y)
         return (leftUppercut, rightUppercut)
