@@ -6,6 +6,9 @@ from PunchDetector import PunchDetector
 from sound_effect import SoundEffect
 from Speed import Speed
 from datetime import datetime
+from punchanimation import PunchAnimation
+
+punchanimation = PunchAnimation()
 
 QUEUE_SIZE = 10
 COOLDOWN = 0
@@ -17,12 +20,12 @@ mp_drawing = mp.solutions.drawing_utils
 game_ui = GameUI()
 punch_detector = PunchDetector()
 speed = Speed(QUEUE_SIZE)
-punch_sound = SoundEffect("sound/Punch.mp3", cooldown=1.0)  # Set a 1-second cooldown for the punch sound
+punch_sound = SoundEffect("assets/Punch.mp3", cooldown=1.0)  # Set a 1-second cooldown for the punch sound
 ignore_left, ignore_right = 0, 0
 # Open webcam
 cap = cv2.VideoCapture(0)
 
-duration = 5
+duration = 100
 start_time = datetime.now()
 
 while cap.isOpened():
@@ -122,14 +125,19 @@ while cap.isOpened():
         if current_command == "Left Jab" and left_jab and not ignore_left:
             ignore_left += 1
             if punch_sound.play():  # Play sound with cooldown
+                position = (int(left_hand.x * frame.shape[1]), int(left_hand.y * frame.shape[0]))
+                punchanimation.draw(frame,position)
                 game_ui.increment_score()
                 game_ui.clear_command()
+                
         elif current_command == "Right Jab" and right_jab and not ignore_right:
             ignore_right += 1
             if punch_sound.play():  # Play sound with cooldown
+                position = ((right_hand.x * frame.shape[1]), (right_hand.y * frame.shape[0]))
+                punchanimation.draw(frame, position)
                 game_ui.increment_score()
                 game_ui.clear_command()
-
+                
 
     # Display the game UI (commands and score)
     frame = game_ui.display(frame)
