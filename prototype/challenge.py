@@ -1,5 +1,6 @@
 import random
 import cv2
+import numpy as np
 
 
 class Challenge():
@@ -36,10 +37,19 @@ class PunchChallenge(Challenge):
         # too lazy to refactor vars
         x = self.x
         y = self.y
+        size = self.size
+
         self.image = cv2.resize(PunchChallenge.BASE_IMG,
-                                (self.size, self.size))
-        frame[y:y + self.size, x:x+self.size] = cv2.addWeighted(
-            frame[y:y + self.size, x:x+self.size], 1.0, self.image, 1.0, 1)
+                                (size, size))
+        adjustmentPixel = 1 if size % 2 != 0 else 0
+        print(np.shape(frame[y - size // 2: y + size //
+                             2, x - size // 2: x + size // 2]))
+        print(np.shape(self.image))
+        frame[y - size // 2: y + size // 2 + adjustmentPixel, x - size // 2: x + size // 2 + adjustmentPixel] = cv2.addWeighted(
+            frame[y - size // 2: y + size // 2 + adjustmentPixel, x - size // 2: x + size // 2 + adjustmentPixel], 1.0, self.image, 1.0, 1)
+
+        cv2.circle(frame, (x, y), (PunchChallenge.END_SIZE - 10) //
+                   2, (0, 0, 255), 2)
 
 
 class ChallengeManager():
@@ -53,9 +63,11 @@ class ChallengeManager():
                 self.challenges.remove(challenge)
         # handle collisions
 
-    def generatePunchChallenge(self, frameWidth=1920, frameHeight=1080, startSize=50, timeToLive=3, observer=None):
-        x = random.randint(0, frameWidth - PunchChallenge.END_SIZE)
-        y = random.randint(0, frameHeight - PunchChallenge.END_SIZE)
+    def generatePunchChallenge(self, frameWidth=1920, frameHeight=1080, startSize=50, timeToLive=5, observer=None):
+        x = random.randint(PunchChallenge.END_SIZE // 2 + 1,
+                           frameWidth - PunchChallenge.END_SIZE)
+        y = random.randint(PunchChallenge.END_SIZE // 2 + 1,
+                           frameHeight - PunchChallenge.END_SIZE)
         challenge = PunchChallenge(x, y, startSize, timeToLive, observer)
         self.challenges.append(challenge)
         return challenge
