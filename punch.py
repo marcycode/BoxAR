@@ -3,12 +3,15 @@ import mediapipe as mp
 import time
 import math
 from collections import deque
+from PunchDetector import PunchDetector
 
 QUEUE_SIZE = 5
 # Initialize MediaPipe Pose
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose()
 mp_drawing = mp.solutions.drawing_utils
+
+pd = PunchDetector()
 
 # Open webcam
 cap = cv2.VideoCapture(0)
@@ -27,23 +30,6 @@ def calculate_distance(point1, point2):
     """Calculate Euclidean distance between two points."""
     dist = math.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
     return dist if point1[0] >= point2[0] else -dist
-
-def detect_jab(landmarks):
-    """
-    Simple logic to detect a jab: 
-    Checks if the wrist moves forward (in the x-axis) relative to the shoulder.
-    """
-    right_wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
-    right_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
-    
-    left_wrist = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value]
-    left_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
-
-    # Detect a "jab" motion
-    left_jab = left_wrist.x > left_shoulder.x - 0.1 # Left jab threshold
-    right_jab = right_wrist.x < right_shoulder.x + 0.1  # Right jab threshold
-
-    return left_jab, right_jab
 
 while cap.isOpened():
     ret, frame = cap.read()
@@ -100,15 +86,27 @@ while cap.isOpened():
                 # cv2.putText(frame, f"Left Speed: {left_speed:.2f} px/s", (50, 50),
                 #             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
                 
-                # Detect jabs
-                left_jab, right_jab = detect_jab(landmarks)
+                right_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
+                right_elbow = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value]
+                left_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
+                left_elbow = landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value]
+                nose = landmarks[mp_pose.PoseLandmark.NOSE.value]
 
-                if right_average > 100 and right_jab:
-                    cv2.putText(frame, "RIGHT PUNCH!", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
+                left_jab, right_jab = pd.detect_jab(left_wrist.x, left_shoulder.x, left_elbow.x, 
+                                                        right_wrist.x, right_shoulder.x, right_elbow.x)
+                left_cross, right_cross = pd.detect_cross(nose.x, left_wrist.x, left_shoulder.x, left_elbow.x, 
+                                                        right_wrist.x, right_shoulder.x, right_elbow.x)
 
-                if left_average < -100 and left_jab:
-                    cv2.putText(frame, "LEFT PUNCH!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
-
+                if right_average > 150 and right_wrist.visibility > 0.98 and right_shoulder.visibility > 0.98 and right_elbow.visibility > 0.98:
+                    if right_jab:
+                        cv2.putText(frame, "RIGHT JAB!", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
+                    elif right_cross:
+                        cv2.putText(frame, "RIGHT CROSS!", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
+                if left_average < -150 and left_wrist.visibility > 0.98 and left_shoulder.visibility > 0.98 and left_elbow.visibility > 0.98:
+                    if left_jab:
+                        cv2.putText(frame, "LEFT JAB!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
+                    elif left_cross:
+                        cv2.putText(frame, "LEFT CROSS!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
 
         # Update the previous wrist position and time
         right_prev_wrist_position = right_wrist_position
