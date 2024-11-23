@@ -16,16 +16,16 @@ def detect_jab(landmarks):
     Checks if the wrist moves forward (in the x-axis) relative to the shoulder.
     """
     left_wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
-    left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
+    left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value]
     
     right_wrist = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value]
-    right_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
+    right_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value]
 
     # Detect a "jab" motion
     print(left_wrist, left_shoulder)
     print(right_wrist, right_shoulder)
-    left_jab = left_wrist.x > left_shoulder.x + 0.1  # Left jab threshold
-    right_jab = right_wrist.x < right_shoulder.x - 0.1  # Right jab threshold
+    left_jab = left_wrist.x > left_shoulder.x # Left jab threshold
+    right_jab = right_wrist.x < right_shoulder.x  # Right jab threshold
 
     return right_jab, left_jab
 
