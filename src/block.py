@@ -25,22 +25,22 @@ class Block:
         nose = convertLandmarkToPoint(landmarks[0])
         left_tuck = (
             self.calculate_distance(
-                [left_elbow.x, left_elbow.y], [left_shoulder.x, left_shoulder.y]
+                [left_elbow[0], left_elbow[1]], [left_shoulder[0], left_shoulder[1]]
             )
             < 0.15
         )
         right_tuck = (
             self.calculate_distance(
-                [right_elbow.x, right_elbow.y], [right_shoulder.x, right_shoulder.y]
+                [right_elbow[0], right_elbow[0]], [right_shoulder[0], right_shoulder[1]]
             )
             < 0.15
         )
 
         left_wrist_face = (
-            self.calculate_distance([left_wrist.x, left_wrist.y], [nose.x, nose.y]) < 0.15
+            self.calculate_distance([left_wrist[0], left_wrist[1]], [nose[0], nose[1]]) < 0.15
         )
         right_wrist_face = (
-            self.calculate_distance([right_wrist.x, right_wrist.y], [nose.x, nose.y]) < 0.15
+            self.calculate_distance([right_wrist[0], right_wrist[1]], [nose[0], nose[1]]) < 0.15
         )
 
         return left_tuck and right_tuck and left_wrist_face and right_wrist_face

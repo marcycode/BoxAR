@@ -10,6 +10,7 @@ from punchanimation import PunchAnimation
 from challenge import ChallengeManager
 from update_hook import EventManager
 from observer import CollisionObserver
+import os
 
 punchanimation = PunchAnimation("assets/punchanimation.gif")
 
@@ -33,6 +34,10 @@ cap = cv2.VideoCapture(0)
 FRAME_WIDTH = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))   # int `width`
 FRAME_HEIGHT = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))  # int `height`
 CHALLENGE_START_SIZE = 50
+
+os.environ["FRAME_WIDTH"] = f"{FRAME_WIDTH}"
+os.environ["FRAME_HEIGHT"] = f"{FRAME_HEIGHT}"
+
 
 collisionObserver = CollisionObserver()
 challengeManager = ChallengeManager()
@@ -181,7 +186,7 @@ while cap.isOpened():
     collisions = collisionObserver.getCollisionCount()
     eventManager.update(context)
     drawManager.update(context)
-    if collisions >= collisionObserver.getCollisionCount() - 1:
+    if collisions == collisionObserver.getCollisionCount() - 1:
         game_ui.decrement_score()
 
     # Display the game UI (commands and score)
