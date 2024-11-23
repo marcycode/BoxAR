@@ -24,7 +24,8 @@ mp_drawing = mp.solutions.drawing_utils
 game_ui = GameUI()
 punch_detector = PunchDetector()
 speed = Speed(QUEUE_SIZE)
-punch_sound = SoundEffect("assets/Punch.mp3", cooldown=1.0)  # Set a 1-second cooldown for the punch sound
+# Set a 1-second cooldown for the punch sound
+punch_sound = SoundEffect("assets/Punch.mp3", cooldown=1.0)
 ignore_left, ignore_right = 0, 0
 # Open webcam
 cap = cv2.VideoCapture(0)
@@ -70,8 +71,12 @@ while cap.isOpened():
     # Process the frame with MediaPipe
     results = pose.process(rgb_frame)
 
+    context["frame"] = frame
+    context["landmarks"] = results.pose_landmarks
+
     # Get time and show timer
-    active_time = duration - (datetime.now() - start_time).seconds  # converting into seconds
+    # converting into seconds
+    active_time = duration - (datetime.now() - start_time).seconds
 
     if active_time > 0:
         cv2.putText(
@@ -94,7 +99,8 @@ while cap.isOpened():
         thickness = 5
 
         # Get text size
-        (text_width, text_height), baseline = cv2.getTextSize(text, font, font_scale, thickness)
+        (text_width, text_height), baseline = cv2.getTextSize(
+            text, font, font_scale, thickness)
 
         # Calculate the position for the text to appear in the center
         frame_height, frame_width, _ = frame.shape
@@ -127,7 +133,8 @@ while cap.isOpened():
         else:
             ignore_right = 0
         # Draw pose landmarks
-        mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+        mp_drawing.draw_landmarks(
+            frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
 
         # Extract landmarks
         landmarks = results.pose_landmarks.landmark
@@ -139,13 +146,18 @@ while cap.isOpened():
         right_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
         right_hand = landmarks[mp_pose.PoseLandmark.LEFT_INDEX.value]
 
-        right_wrist_position = (right_wrist.x * frame.shape[1], right_wrist.y * frame.shape[0])
-        left_wrist_position = (left_wrist.x * frame.shape[1], left_wrist.y * frame.shape[0])
+        right_wrist_position = (
+            right_wrist.x * frame.shape[1], right_wrist.y * frame.shape[0])
+        left_wrist_position = (
+            left_wrist.x * frame.shape[1], left_wrist.y * frame.shape[0])
 
-        right_hand_position = (right_hand.x * frame.shape[1], right_hand.y * frame.shape[0])
-        left_hand_position = (left_hand.x * frame.shape[1], left_hand.y * frame.shape[0])
+        right_hand_position = (
+            right_hand.x * frame.shape[1], right_hand.y * frame.shape[0])
+        left_hand_position = (
+            left_hand.x * frame.shape[1], left_hand.y * frame.shape[0])
 
-        right_average, left_average = speed.calculate_speeds(current_time, right_wrist_position, left_wrist_position)
+        right_average, left_average = speed.calculate_speeds(
+            current_time, right_wrist_position, left_wrist_position)
 
         # Detect punches
         left_jab, right_jab = punch_detector.detect_jab(left_wrist, left_shoulder, left_average,
@@ -153,33 +165,27 @@ while cap.isOpened():
 
         # Check for correct punches based on the current command
         current_command = game_ui.current_command
+        # current_command = "Dodge"
         if current_command == "Left Jab" and left_jab and not ignore_left:
             ignore_left += 1
             if punch_sound.play():  # Play sound with cooldown
                 punchanimation.trigger(left_hand_position)
                 game_ui.increment_score()
                 game_ui.clear_command()
-                
+
         elif current_command == "Right Jab" and right_jab and not ignore_right:
             ignore_right += 1
             if punch_sound.play():  # Play sound with cooldown
                 punchanimation.trigger(right_hand_position)
                 game_ui.increment_score()
                 game_ui.clear_command()
-        
-        elif current_command == "Dodge":
-            context["frame"] = frame
-            context["landmarks"] = results.pose_landmarks
 
-            eventManager.update(context)
-            drawManager.update(context)
-            
-                
+    eventManager.update(context)
+    drawManager.update(context)
 
     # Display the game UI (commands and score)
     frame = punchanimation.draw(frame)
 
-    
     frame = game_ui.display(frame)
 
     # Show the video feed

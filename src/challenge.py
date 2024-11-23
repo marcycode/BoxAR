@@ -14,7 +14,7 @@ class Challenge():
 
 
 class PunchChallenge(Challenge):
-    END_SIZE = 100
+    END_SIZE = 300
     BASE_IMG = cv2.imread("glove.png")
 
     def __init__(self, x: int, y: int, startSize: int, timeToLive=3, observer=None):
