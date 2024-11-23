@@ -8,7 +8,7 @@ class GameUI:
         self.current_command = None
         self.last_command_time = time.time()
         self.command_interval = 3  # Command update interval in seconds
-        self.commands = ["Left Jab", "Right Jab", "Dodge"]
+        self.commands = ["Left Jab", "Right Jab"]
 
     def update_command(self):
         """Generate a new command if the interval has elapsed."""

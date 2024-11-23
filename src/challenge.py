@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 
 from collision_detection import hitCriticalMass
+import block
 
 
 class Challenge():
@@ -53,7 +54,7 @@ class PunchChallenge(Challenge):
                    2, (0, 0, 255), 2)
 
     def checkCollision(self, landmarks):
-        if hitCriticalMass(landmarks, (self.x, self.y), self.size // 2):
+        if hitCriticalMass(landmarks, (self.x, self.y), self.size // 2) and not block.detectBlock(landmarks):
             self.expired = True
             if self.observer:
                 self.observer.notify(self)
