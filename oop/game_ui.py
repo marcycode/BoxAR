@@ -9,7 +9,7 @@ class GameUI:
         self.score = 0
         self.current_command = None
         self.last_command_time = time.time()
-        self.command_interval = 5  # Command duration in seconds
+        self.command_interval = 3 # Command duration in seconds
 
     def generate_command(self):
         """Generate a random command: 'Left Jab' or 'Right Jab'."""
