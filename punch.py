@@ -97,15 +97,15 @@ while cap.isOpened():
                 left_cross, right_cross = pd.detect_cross(nose.x, left_wrist.x, left_shoulder.x, left_elbow.x, 
                                                         right_wrist.x, right_shoulder.x, right_elbow.x)
 
-                if right_average > 150 and right_wrist.visibility > 0.98 and right_shoulder.visibility > 0.98 and right_elbow.visibility > 0.98:
-                    if right_jab:
+                if right_wrist.visibility > 0.98 and right_shoulder.visibility > 0.98 and right_elbow.visibility > 0.98:
+                    if right_average > 150 and right_jab:
                         cv2.putText(frame, "RIGHT JAB!", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
-                    elif right_cross:
+                    elif right_average < -150 and right_cross:
                         cv2.putText(frame, "RIGHT CROSS!", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
-                if left_average < -150 and left_wrist.visibility > 0.98 and left_shoulder.visibility > 0.98 and left_elbow.visibility > 0.98:
-                    if left_jab:
+                if left_wrist.visibility > 0.98 and left_shoulder.visibility > 0.98 and left_elbow.visibility > 0.98:
+                    if left_average < -150 and left_jab:
                         cv2.putText(frame, "LEFT JAB!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
-                    elif left_cross:
+                    elif left_average > 150 and left_cross:
                         cv2.putText(frame, "LEFT CROSS!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3)
 
         # Update the previous wrist position and time

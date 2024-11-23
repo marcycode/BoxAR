@@ -12,7 +12,7 @@ class PunchDetector(object):
         Checks if the wrist moves forward (in the x-axis) relative to the shoulder and elbow.
         """
         leftJab = leftWrist < leftShoulder + 0.1 and leftWrist < leftElbow + 0.05
-        rightJab = rightWrist > rightShoulder - 0.1 and rightWrist > rightElbow - 0.1
+        rightJab = rightWrist > rightShoulder - 0.1 and rightWrist > rightElbow - 0.05
         return (leftJab, rightJab)
     
     def detect_cross(self, nose: float, leftWrist: float, leftShoulder: float, 
