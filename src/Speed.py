@@ -52,7 +52,7 @@ class Speed:
     def calculate_speed_towards_camera(self, current_time, right_hand, left_hand):
         right_average, left_average= 0, 0
         # If a previous wrist position exists, calculate speed
-        if self.right_prev_wrist_position is not None and self.left_prev_wrist_position is not None:
+        if self.prev_right is not None and self.prev_left is not None:
             right = right_hand - self.prev_right
             left = left_hand - self.prev_left
             time_diff = current_time - self.prev_time
@@ -66,7 +66,7 @@ class Speed:
                 right_average = sum(self.right_speeds) / len(self.right_speeds)
                 left_average = sum(self.left_speeds) / len(self.left_speeds)
 
-        self.prev_left, self.prev_right = left_hand.z, right_hand.z
+        self.prev_left, self.prev_right = left_hand, right_hand
         self.prev_time = current_time
 
         return right_average, left_average

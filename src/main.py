@@ -102,17 +102,19 @@ while cap.isOpened():
 
         # Extract landmarks
         landmarks = results.pose_landmarks.landmark
-        left_wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
-        left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
-        left_hand = landmarks[mp_pose.PoseLandmark.LEFT_INDEX.value]
+        left_wrist = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value]
+        left_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
+        left_hand = landmarks[mp_pose.PoseLandmark.RIGHT_INDEX.value]
 
-        right_wrist = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value]
-        right_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
-        right_hand = landmarks[mp_pose.PoseLandmark.RIGHT_INDEX.value]
-        nose = landmarks[mp_pose.PoseLandmark.NOSE.value]
+        right_wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
+        right_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
+        right_hand = landmarks[mp_pose.PoseLandmark.LEFT_INDEX.value]
 
         right_wrist_position = (right_wrist.x * frame.shape[1], right_wrist.y * frame.shape[0])
         left_wrist_position = (left_wrist.x * frame.shape[1], left_wrist.y * frame.shape[0])
+
+        right_hand_position = (right_hand.x * frame.shape[1], right_hand.y * frame.shape[0])
+        left_hand_position = (left_hand.x * frame.shape[1], left_hand.y * frame.shape[0])
 
         right_average, left_average = speed.calculate_speeds(current_time, right_wrist_position, left_wrist_position)
 
@@ -125,16 +127,14 @@ while cap.isOpened():
         if current_command == "Left Jab" and left_jab and not ignore_left:
             ignore_left += 1
             if punch_sound.play():  # Play sound with cooldown
-                position = (int(left_hand.x * frame.shape[1]), int(left_hand.y * frame.shape[0]))
-                punchanimation.draw(frame,position)
+                punchanimation.draw(frame, left_hand_position)
                 game_ui.increment_score()
                 game_ui.clear_command()
                 
         elif current_command == "Right Jab" and right_jab and not ignore_right:
             ignore_right += 1
             if punch_sound.play():  # Play sound with cooldown
-                position = ((right_hand.x * frame.shape[1]), (right_hand.y * frame.shape[0]))
-                punchanimation.draw(frame, position)
+                punchanimation.draw(frame, right_hand_position)
                 game_ui.increment_score()
                 game_ui.clear_command()
                 
