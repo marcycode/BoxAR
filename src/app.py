@@ -36,6 +36,8 @@ def points():
 @app.route("/restart", methods=["POST"])
 def restart():
     global video_camera_instance
+    global flag
+    flag = True
     try:
         if video_camera_instance is not None:
             video_camera_instance.restart()
@@ -65,30 +67,24 @@ def gen(camera, mode):
             frame = camera.free_mode()
         score = s
         yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n\r\n")
-    del camera
-
+    video_camera_instance.restart()
 
 @app.route("/boxing_feed")
 def boxing_feed():
-    global camera_context
     global video_camera_instance  # Access the global instance
     mode = request.args.get("mode")
     if mode is None:
         mode = "free-play"
     page_width = int(request.args.get("page_width"))
     page_height = int(request.args.get("page_height"))
-    if not camera_context:
+    if not video_camera_instance:
         # TEMP TESTING CODE
         multiplayerData = MultiPlayerConnectionData(
             peer_ip="10.217.13.79", peer_port=8080
         )
-        camera_context = VideoCamera(
+        video_camera_instance = VideoCamera(
             page_width, page_height, multiplayerData=multiplayerData
         )
-    if video_camera_instance is None:
-        video_camera_instance = VideoCamera(
-            page_width, page_height
-        )  # Initialize instance
     response = Response(
         gen(video_camera_instance, mode),
         mimetype="multipart/x-mixed-replace; boundary=frame",
