@@ -306,6 +306,61 @@ class VideoCamera(object):
                     frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS
                 )
 
+                landmarks = results.pose_landmarks.landmark
+                left_wrist = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value]
+                left_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
+                left_hand = landmarks[mp_pose.PoseLandmark.RIGHT_INDEX.value]
+
+                right_wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
+                right_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
+                right_hand = landmarks[mp_pose.PoseLandmark.LEFT_INDEX.value]
+
+                right_wrist_position = (
+                    right_wrist.x * frame.shape[1],
+                    right_wrist.y * frame.shape[0],
+                )
+                left_wrist_position = (
+                    left_wrist.x * frame.shape[1],
+                    left_wrist.y * frame.shape[0],
+                )
+
+                right_hand_position = (
+                    right_hand.x * frame.shape[1],
+                    right_hand.y * frame.shape[0],
+                )
+                left_hand_position = (
+                    left_hand.x * frame.shape[1],
+                    left_hand.y * frame.shape[0],
+                )
+
+                right_average, left_average = speed.calculate_speeds(
+                    current_time, right_wrist_position, left_wrist_position
+                )
+
+                # Detect punches
+                left_jab, right_jab = punch_detector.detect_jab(
+                    left_wrist,
+                    left_shoulder,
+                    left_average,
+                    right_wrist,
+                    right_shoulder,
+                    right_average,
+                )
+
+                if left_jab and not ignore_left:
+                    ignore_left += 1
+                    if punch_sound.play():  # Play sound with cooldown
+                        punchanimation.trigger(left_hand_position)
+                        game_ui.increment_score()
+                        game_ui.clear_command()
+
+                elif right_jab and not ignore_right:
+                    ignore_right += 1
+                    if punch_sound.play():  # Play sound with cooldown
+                        punchanimation.trigger(right_hand_position)
+                        game_ui.increment_score()
+                        game_ui.clear_command()
+
             # Update the game frame with animations and UI
             frame = punchanimation.draw(frame)
             frame = game_ui.display(frame)
