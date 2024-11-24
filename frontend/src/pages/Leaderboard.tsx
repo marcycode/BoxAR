@@ -11,6 +11,13 @@ const Leaderboard: React.FC = () => {
   const [highscores, setHighscores] = useState<Player[]>([]);
   const [survivalScores, setSurvivalScores] = useState<Player[]>([]);
 
+  const storedHighscores: Player[] = JSON.parse(
+    localStorage.getItem("highscores")!
+  );
+  const storedSurvivalScores: Player[] = JSON.parse(
+    localStorage.getItem("survivalScores")!
+  );
+
   // Fetch high scores from the JSON file
   useEffect(() => {
     fetch("/highscore.json")
@@ -37,62 +44,66 @@ const Leaderboard: React.FC = () => {
   return (
     <div className="flex flex-row w-[100vw] justify-center items-center text-center gap-8">
       <div className="w-[45vw]">
-        <h1 className="text-2xl font-bold mb-4">Highscore Leaderboard</h1>
-        <table className="w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="border border-gray-300 px-4 py-2">Rank</th>
-              <th className="border border-gray-300 px-4 py-2">Initials</th>
-              <th className="border border-gray-300 px-4 py-2">High Score</th>
-            </tr>
-          </thead>
-          <tbody>
-            {highscores
-              .sort((a, b) => b.highscore - a.highscore) // Sort by highscore descending
-              .map((player, index) => (
-                <tr key={index} className="odd:bg-white even:bg-gray-100">
-                  <td className="border border-gray-300 px-4 py-2">
-                    {index + 1}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {player.initials}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {player.highscore}
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
+        <h1 className="text-2xl font-bold mb-4">Scoring Mode Leaderboard</h1>
+        <div className="max-h-[40vh] overflow-auto">
+          <table className="w-full border-collapse border border-gray-300 ">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border border-gray-300 px-4 py-2">Rank</th>
+                <th className="border border-gray-300 px-4 py-2">Initials</th>
+                <th className="border border-gray-300 px-4 py-2">High Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {storedHighscores
+                .sort((a, b) => b.highscore - a.highscore) // Sort by highscore descending
+                .map((player, index) => (
+                  <tr key={index} className="odd:bg-white even:bg-gray-100">
+                    <td className="border border-gray-300 px-4 py-2">
+                      {index + 1}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      {player.initials}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      {player.highscore}
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
       </div>
       <div className="w-[45vw]">
         <h1 className="text-2xl font-bold mb-4">Survival Leaderboard</h1>
-        <table className="w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="border border-gray-300 px-4 py-2">Rank</th>
-              <th className="border border-gray-300 px-4 py-2">Initials</th>
-              <th className="border border-gray-300 px-4 py-2">High Score</th>
-            </tr>
-          </thead>
-          <tbody>
-            {survivalScores
-              .sort((a, b) => b.highscore - a.highscore) // Sort by highscore descending
-              .map((player, index) => (
-                <tr key={index} className="odd:bg-white even:bg-gray-100">
-                  <td className="border border-gray-300 px-4 py-2">
-                    {index + 1}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {player.initials}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {player.highscore}
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
+        <div className="max-h-[40vh] overflow-auto">
+          <table className="w-full border-collapse border border-gray-300">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border border-gray-300 px-4 py-2">Rank</th>
+                <th className="border border-gray-300 px-4 py-2">Initials</th>
+                <th className="border border-gray-300 px-4 py-2">High Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {storedSurvivalScores
+                .sort((a, b) => b.highscore - a.highscore) // Sort by highscore descending
+                .map((player, index) => (
+                  <tr key={index} className="odd:bg-white even:bg-gray-100">
+                    <td className="border border-gray-300 px-4 py-2">
+                      {index + 1}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      {player.initials}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      {player.highscore}
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

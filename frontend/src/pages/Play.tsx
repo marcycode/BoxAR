@@ -13,12 +13,15 @@ function Play() {
   const [gameloaded, setGameLoaded] = useState(false);
 
   const pushToStorage = (name: string, score: number) => {
+    console.log("pushing new score");
     const jsonData = JSON.parse(localStorage.getItem(name)!);
 
     jsonData.push({
       initials: "TST",
-      highscore: score.toString(),
+      highscore: score,
     });
+
+    console.log(jsonData);
 
     const jsonString = JSON.stringify(jsonData);
 

@@ -12,7 +12,11 @@ function App() {
         }
         return response.json();
       })
-      .then((data) => localStorage.setItem("highscores", JSON.stringify(data)))
+      .then((data) => {
+        if (localStorage.getItem("highscores") === null) {
+          localStorage.setItem("highscores", JSON.stringify(data));
+        }
+      })
       .catch((error) => console.error("Error setting high scores:", error));
 
     fetch("/survivalScores.json")
@@ -22,9 +26,11 @@ function App() {
         }
         return response.json();
       })
-      .then((data) =>
-        localStorage.setItem("survivalScores", JSON.stringify(data))
-      )
+      .then((data) => {
+        if (localStorage.getItem("survivalScores") === null) {
+          localStorage.setItem("survivalScores", JSON.stringify(data));
+        }
+      })
       .catch((error) => console.error("Error setting survival scores:", error));
   }, []);
 
