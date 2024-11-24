@@ -23,6 +23,7 @@ def points():
 def gen(camera, mode):
     flag = True
     global score
+    s = 0
     while flag:
         if mode == "survival":
             frame, flag, s = camera.survival_mode()

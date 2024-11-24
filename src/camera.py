@@ -348,6 +348,7 @@ class VideoCamera(object):
 
     def survival_mode(self):
         global ignore_left, ignore_right
+        flag = True
         while self.video.isOpened():
             ret, frame = self.video.read()
             if not ret:
