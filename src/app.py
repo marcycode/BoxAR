@@ -1,8 +1,10 @@
 from flask import Flask, render_template, Response, request
 from camera import VideoCamera
+from multiplayer import MultiPlayerConnectionData
 
 
 app = Flask(__name__)
+camera_context: VideoCamera = None
 score = 0
 flag = True
 
@@ -16,11 +18,13 @@ def index():
 def ping():
     return "Successfully pinged"
 
+
 @app.route("/score")
 def points():
     global score
     global flag
     return {"score": str(score), "finished": str(not flag)}
+
 
 def gen(camera, mode):
     global flag
@@ -45,17 +49,46 @@ def gen(camera, mode):
 
 @app.route("/boxing_feed")
 def boxing_feed():
+    global camera_context
     mode = request.args.get("mode")
     if mode is None:
         mode = "free-play"
     page_width = int(request.args.get("page_width"))
     page_height = int(request.args.get("page_height"))
+    if not camera_context:
+        # TEMP TESTING CODE
+        multiplayerData = MultiPlayerConnectionData(
+            peer_ip="localhost", peer_port=8000)
+        camera_context = VideoCamera(
+            page_width, page_height, multiplayerData=multiplayerData)
     response = Response(
-        gen(VideoCamera(page_width, page_height), mode),
+        gen(camera_context, mode),
         mimetype="multipart/x-mixed-replace; boundary=frame",
     )
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response
+
+
+@app.post("/api/punch")
+def receive_punch():
+    global camera_context
+    data = request.json
+    assert ("punchLocation" in data)
+
+    if not camera_context:
+        res = Response("Camera not initialized", status=500)
+        return res
+
+    punchLocation = data.get("punchLocation")
+    try:
+        punchLocation = (float(punchLocation[0]), float(punchLocation[1]))
+    except ValueError:
+        res = Response("Invalid punch location", status=400)
+        return res
+    camera_context.challengeManager.addPunchChallenge(
+        data.get("punchLocation"), multiplayerPunch=True)
+    print(data)
+    return "Punch received"
 
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@ from Speed import Speed
 from datetime import datetime
 from punch_animation import PunchAnimation
 from challenge import ChallengeManager
+from multiplayer import MultiPlayerManager, MultiPlayerConnectionData
 from update_hook import EventManager
 from observer import CollisionObserver
 from cv2constants import CV_VIDEO_CAPTURE_DEVICE
@@ -40,13 +41,15 @@ start_time = datetime.now()
 
 
 class VideoCamera(object):
-    def __init__(self, page_width, page_height):
+    def __init__(self, page_width, page_height, multiplayerData: MultiPlayerConnectionData = None):
         self.video = cv2.VideoCapture(CV_VIDEO_CAPTURE_DEVICE)
         # FIX BELOW
         self.video.set(3, page_width / 1.75)  # 3 -> WIDTH
         self.video.set(4, page_height / 1.75)  # 4 -> HEIGHT
-        FRAME_WIDTH = int(self.video.get(cv2.CAP_PROP_FRAME_WIDTH))  # int `width`
-        FRAME_HEIGHT = int(self.video.get(cv2.CAP_PROP_FRAME_HEIGHT))  # int `height`
+        FRAME_WIDTH = int(self.video.get(
+            cv2.CAP_PROP_FRAME_WIDTH))  # int `width`
+        FRAME_HEIGHT = int(self.video.get(
+            cv2.CAP_PROP_FRAME_HEIGHT))  # int `height`
         CHALLENGE_START_SIZE = 50
 
         os.environ["FRAME_WIDTH"] = f"{FRAME_WIDTH}"
@@ -54,6 +57,12 @@ class VideoCamera(object):
 
         self.collisionObserver = CollisionObserver()
         self.challengeManager = ChallengeManager()
+
+        self.multiplayerManager = None
+        if multiplayerData:
+            self.multiplayerManager = MultiPlayerManager(
+                multiplayerData.peer_ip, multiplayerData.peer_port, self.challengeManager)
+
         self.eventManager = EventManager()
         self.eventManager.addEvent(
             "generatePunchChallenge",
@@ -70,7 +79,8 @@ class VideoCamera(object):
 
         self.drawManager = EventManager()
         self.drawManager.addEvent(
-            "draw_challenges", 1, self.challengeManager.drawChallenges, ["frame"]
+            "draw_challenges", 1, self.challengeManager.drawChallenges, [
+                "frame"]
         )
         self.context = {
             "frameWidth": FRAME_WIDTH,
@@ -329,6 +339,14 @@ class VideoCamera(object):
                     ignore_right += 1
                     if punch_sound.play():  # Play sound with cooldown
                         punchanimation.trigger(right_hand_position)
+
+                # TEMP TESTING CODE
+                if left_jab and self.multiplayerManager:
+                    self.multiplayerManager.sendPunch(
+                        (left_wrist.x, left_wrist.y))
+                if right_jab and self.multiplayerManager:
+                    self.multiplayerManager.sendPunch(
+                        (right_wrist.x, right_wrist.y))
 
             collisions = self.collisionObserver.getCollisionCount()
             self.eventManager.update(self.context)
