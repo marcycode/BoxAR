@@ -20,6 +20,7 @@ from cv2constants import CV_VIDEO_CAPTURE_DEVICE
 import os
 from block import Block
 
+MAX_HEALTH = 5
 # Initialize MediaPipe pose detection
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose(
@@ -104,14 +105,14 @@ class VideoCamera(object):
             "startSize": CHALLENGE_START_SIZE,
             "observer": self.collisionObserver,
         }
-        self.health = 5
+        self.health = MAX_HEALTH
         self.duration = 30  # Timer for scoring mode
         self.start_time = datetime.now()  # Initialize timer start time
         self.cooldownBar = CooldownBar(30)
 
     def restart(self):
         """Reset game state for both scoring and survival modes."""
-        self.health = 5  # Reset health for survival mode
+        self.health = MAX_HEALTH  # Reset health for survival mode
         self.start_time = datetime.now()  # Reset timer for scoring mode
         game_ui.reset_score()  # Reset score
 
@@ -418,7 +419,7 @@ class VideoCamera(object):
 
                 # Calculate current health bar width
                 current_bar_width = int(
-                    (self.health / 20) * bar_width
+                    (self.health / MAX_HEALTH) * bar_width
                 )  # Assuming max health = 20
 
                 # Draw the background (gray bar)
@@ -433,8 +434,8 @@ class VideoCamera(object):
                 # Determine bar color based on health
                 bar_color = (
                     (0, 255, 0)
-                    if self.health > 10
-                    else (0, 255, 255) if self.health > 5 else (0, 0, 255)
+                    if self.health > MAX_HEALTH // 2
+                    else (0, 255, 255) if self.health > MAX_HEALTH // 4 else (0, 0, 255)
                 )
 
                 # Draw the current health bar
@@ -449,7 +450,7 @@ class VideoCamera(object):
                 # Add text for health
                 cv2.putText(
                     frame,
-                    f"Health: {self.health}/20",
+                    f"Health: {self.health}/{MAX_HEALTH}",
                     (bar_x, bar_y - 10),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.7,
@@ -605,7 +606,7 @@ class VideoCamera(object):
                 bar_height = 30  # Height of the health bar
 
                 # Calculate current health bar width
-                current_bar_width = int((self.health / 20) * bar_width)  # Assuming max health = 20
+                current_bar_width = int((self.health / MAX_HEALTH) * bar_width)  # Assuming max health = 20
 
                 # Draw the background (gray bar)
                 cv2.rectangle(
@@ -618,7 +619,7 @@ class VideoCamera(object):
 
                 # Determine bar color based on health
                 bar_color = (
-                    (0, 255, 0) if self.health > 10 else (0, 255, 255) if self.health > 5 else (0, 0, 255)
+                    (0, 255, 0) if self.health > MAX_HEALTH // 2 else (0, 255, 255) if self.health > MAX_HEALTH // 4 else (0, 0, 255)
                 )
 
                 # Draw the current health bar
@@ -633,7 +634,7 @@ class VideoCamera(object):
                 # Add text for health
                 cv2.putText(
                     frame,
-                    f"Health: {self.health}/20",
+                    f"Health: {self.health}/{MAX_HEALTH}",
                     (bar_x, bar_y - 10),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.7,
