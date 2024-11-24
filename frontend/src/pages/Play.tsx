@@ -19,7 +19,7 @@ function Play() {
     const jsonData = JSON.parse(localStorage.getItem(name)!);
 
     jsonData.push({
-      initials: username,
+      initials: username ?? "USR",
       highscore: score,
     });
 
