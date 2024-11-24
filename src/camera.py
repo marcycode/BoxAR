@@ -192,10 +192,6 @@ class VideoCamera(object):
                     ignore_right += 1
                 else:
                     ignore_right = 0
-                # Draw pose landmarks
-                mp_drawing.draw_landmarks(
-                    frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS
-                )
 
                 # Extract landmarks
                 landmarks = results.pose_landmarks.landmark
@@ -316,7 +312,7 @@ class VideoCamera(object):
 
             try:
                 ret, jpeg = cv2.imencode(".jpg", frame)
-               
+
             except Exception as e:
                 print(f"Error encoding frame: {e}")
                 continue
@@ -327,8 +323,6 @@ class VideoCamera(object):
                 break
 
             return jpeg.tobytes()
-
-    
 
     def survival_mode(self):
         global ignore_left, ignore_right
@@ -357,16 +351,34 @@ class VideoCamera(object):
                 bar_height = 30  # Height of the health bar
 
                 # Calculate current health bar width
-                current_bar_width = int((self.health / 20) * bar_width)  # Assuming max health = 20
+                current_bar_width = int(
+                    (self.health / 20) * bar_width
+                )  # Assuming max health = 20
 
                 # Draw the background (gray bar)
-                cv2.rectangle(frame, (bar_x, bar_y), (bar_x + bar_width, bar_y + bar_height), (50, 50, 50), -1)
+                cv2.rectangle(
+                    frame,
+                    (bar_x, bar_y),
+                    (bar_x + bar_width, bar_y + bar_height),
+                    (50, 50, 50),
+                    -1,
+                )
 
                 # Determine bar color based on health
-                bar_color = (0, 255, 0) if self.health > 10 else (0, 255, 255) if self.health > 5 else (0, 0, 255)
+                bar_color = (
+                    (0, 255, 0)
+                    if self.health > 10
+                    else (0, 255, 255) if self.health > 5 else (0, 0, 255)
+                )
 
                 # Draw the current health bar
-                cv2.rectangle(frame, (bar_x, bar_y), (bar_x + current_bar_width, bar_y + bar_height), bar_color, -1)
+                cv2.rectangle(
+                    frame,
+                    (bar_x, bar_y),
+                    (bar_x + current_bar_width, bar_y + bar_height),
+                    bar_color,
+                    -1,
+                )
 
                 # Add text for health
                 cv2.putText(
@@ -424,10 +436,6 @@ class VideoCamera(object):
                     ignore_right += 1
                 else:
                     ignore_right = 0
-                # Draw pose landmarks
-                mp_drawing.draw_landmarks(
-                    frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS
-                )
 
                 # Extract landmarks
                 landmarks = results.pose_landmarks.landmark
@@ -495,7 +503,6 @@ class VideoCamera(object):
 
             ret, jpeg = cv2.imencode(".jpg", frame)
             return jpeg.tobytes(), flag, game_ui.score
-
 
     def multiplayer_mode(self):
         global ignore_left, ignore_right
@@ -573,10 +580,6 @@ class VideoCamera(object):
                     ignore_right += 1
                 else:
                     ignore_right = 0
-                # Draw pose landmarks
-                mp_drawing.draw_landmarks(
-                    frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS
-                )
 
                 # Extract landmarks
                 landmarks = results.pose_landmarks.landmark
