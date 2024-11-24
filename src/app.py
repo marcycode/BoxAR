@@ -1,19 +1,12 @@
 from flask import Flask, render_template, Response, request
-<<<<<<< HEAD
 from flask_cors import CORS, cross_origin
-=======
-from flask_cors import CORS  # Import Flask-CORS
->>>>>>> af0060040f274737c5a0dcd490c54d745c257a36
 from camera import VideoCamera
 from multiplayer import MultiPlayerConnectionData
 
 app = Flask(__name__)
-<<<<<<< HEAD
 cors = CORS(app)  # allow CORS for all domains on all routes.
 app.config["CORS_HEADERS"] = "Content-Type"
-=======
 camera_context: VideoCamera = None
->>>>>>> af0060040f274737c5a0dcd490c54d745c257a36
 score = 0
 flag = True
 CORS(app)  # Enable CORS for all routes
@@ -40,9 +33,6 @@ def points():
     return {"score": str(score), "finished": str(not flag)}
 
 
-<<<<<<< HEAD
-=======
-
 @app.route("/restart", methods=["POST"])
 def restart():
     global video_camera_instance
@@ -56,7 +46,7 @@ def restart():
         print(f"Error during restart: {e}")  # Log the error to the server console
         return f"An error occurred: {str(e)}", 500
 
->>>>>>> af0060040f274737c5a0dcd490c54d745c257a36
+
 def gen(camera, mode):
     global flag
     global score
@@ -90,11 +80,15 @@ def boxing_feed():
     if not camera_context:
         # TEMP TESTING CODE
         multiplayerData = MultiPlayerConnectionData(
-            peer_ip="10.217.13.79", peer_port=8080)
+            peer_ip="10.217.13.79", peer_port=8080
+        )
         camera_context = VideoCamera(
-            page_width, page_height, multiplayerData=multiplayerData)
+            page_width, page_height, multiplayerData=multiplayerData
+        )
     if video_camera_instance is None:
-        video_camera_instance = VideoCamera(page_width, page_height)  # Initialize instance
+        video_camera_instance = VideoCamera(
+            page_width, page_height
+        )  # Initialize instance
     response = Response(
         gen(video_camera_instance, mode),
         mimetype="multipart/x-mixed-replace; boundary=frame",
@@ -107,7 +101,7 @@ def boxing_feed():
 def receive_punch():
     global camera_context
     data = request.json
-    assert ("punchLocation" in data)
+    assert "punchLocation" in data
 
     if not camera_context:
         res = Response("Camera not initialized", status=500)
@@ -120,7 +114,8 @@ def receive_punch():
         res = Response("Invalid punch location", status=400)
         return res
     camera_context.challengeManager.addPunchChallenge(
-        data.get("punchLocation"), multiplayerPunch=True)
+        data.get("punchLocation"), multiplayerPunch=True
+    )
     return "Punch received"
 
 
