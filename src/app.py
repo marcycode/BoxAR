@@ -39,7 +39,7 @@ def gen(camera, mode):
             frame = camera.free_mode()
         elif mode == "multiplayer":
             # TODO add multiplayer mode logic
-            frame = camera.multiplayer_mode()
+            frame, flag = camera.multiplayer_mode()
         else:
             frame = camera.free_mode()
         score = s
@@ -58,7 +58,7 @@ def boxing_feed():
     if not camera_context:
         # TEMP TESTING CODE
         multiplayerData = MultiPlayerConnectionData(
-            peer_ip="localhost", peer_port=8000)
+            peer_ip="10.217.25.249", peer_port=8000)
         camera_context = VideoCamera(
             page_width, page_height, multiplayerData=multiplayerData)
     response = Response(
@@ -87,7 +87,6 @@ def receive_punch():
         return res
     camera_context.challengeManager.addPunchChallenge(
         data.get("punchLocation"), multiplayerPunch=True)
-    print(data)
     return "Punch received"
 
 

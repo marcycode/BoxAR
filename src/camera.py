@@ -64,15 +64,16 @@ class VideoCamera(object):
                 multiplayerData.peer_ip, multiplayerData.peer_port, self.challengeManager)
 
         self.eventManager = EventManager()
-        self.eventManager.addEvent(
-            "generatePunchChallenge",
-            100,
-            self.challengeManager.generatePunchChallenge,
-            ["frameWidth", "frameHeight", "startSize", "observer"],
-        )
+        if not multiplayerData:
+            self.eventManager.addEvent(
+                "generatePunchChallenge",
+                100,
+                self.challengeManager.generatePunchChallenge,
+                ["frameWidth", "frameHeight", "startSize", "observer"],
+            )
         self.eventManager.addEvent(
             "update_challenges",
-            4,
+            5,
             self.challengeManager.update_challenges,
             ["landmarks"],
         )
@@ -514,6 +515,7 @@ class VideoCamera(object):
 
     def multiplayer_mode(self):
         global ignore_left, ignore_right
+        flag = True
         while self.video.isOpened():
             ret, frame = self.video.read()
             if not ret:
@@ -530,15 +532,10 @@ class VideoCamera(object):
             self.context["frame"] = frame
             self.context["landmarks"] = results.pose_landmarks
 
-            # Get time and show timer
-            active_time = (
-                duration - (datetime.now() - start_time).seconds
-            )  # converting into seconds
-
-            if active_time > 0:
+            if self.health > 0:
                 cv2.putText(
                     frame,
-                    str(active_time),
+                    str(self.health),
                     (frame.shape[1] - 100, 50),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     2,
@@ -573,6 +570,8 @@ class VideoCamera(object):
                     color,
                     thickness,
                 )
+
+                flag = False
 
             # Update the game command
             game_ui.update_command()
@@ -665,7 +664,7 @@ class VideoCamera(object):
             self.eventManager.update(self.context)
             self.drawManager.update(self.context)
             if collisions == self.collisionObserver.getCollisionCount() - 1:
-                game_ui.decrement_score()
+                self.health -= 1
 
             # Display the game UI (commands and score)
             frame = punchanimation.draw(frame)
@@ -677,4 +676,4 @@ class VideoCamera(object):
                 break
 
             ret, jpeg = cv2.imencode(".jpg", frame)
-            return jpeg.tobytes()
+            return jpeg.tobytes(), flag
