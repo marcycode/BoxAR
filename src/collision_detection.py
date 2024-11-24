@@ -1,7 +1,11 @@
 import numpy as np
 import os
+from pygame import mixer
+
+mixer.init()
 
 
+collision_sound = mixer.Sound("assets/collisionsound.mp3")
 def pointIntersectsWithCircle(point, circleCoords, circleRadius):
     return np.linalg.norm(np.array(point) - np.array(circleCoords)) <= circleRadius
 
@@ -68,7 +72,9 @@ def hitCriticalMass(landmarks, circleCoords, circleRadius):
                        headBoxBottomRight, headBoxBottomLeft)
     # if circle is within torso
     if circleIntersectsWithRectangle(circleCoords, circleRadius, torsoBoundingBox):
+        collision_sound.play()
         return True
     elif circleIntersectsWithRectangle(circleCoords, circleRadius, headBoundingBox):
+        collision_sound.play()
         return True
     return False
