@@ -583,6 +583,7 @@ class VideoCamera(object):
         global ignore_left, ignore_right
         flag = True
         self.cooldownBar.setMaxCooldown(15)
+
         while self.video.isOpened():
             ret, frame = self.video.read()
             if not ret:
@@ -599,15 +600,49 @@ class VideoCamera(object):
             self.context["frame"] = frame
             self.context["landmarks"] = results.pose_landmarks
 
+            # Display health bar
             if self.health > 0:
+                # Health Bar Dimensions
+                bar_x = 650  # X-coordinate of the health bar
+                bar_y = 50  # Y-coordinate of the health bar
+                bar_width = 300  # Full width of the health bar
+                bar_height = 30  # Height of the health bar
+
+                # Calculate current health bar width
+                current_bar_width = int((self.health / 20) * bar_width)  # Assuming max health = 20
+
+                # Draw the background (gray bar)
+                cv2.rectangle(
+                    frame,
+                    (bar_x, bar_y),
+                    (bar_x + bar_width, bar_y + bar_height),
+                    (50, 50, 50),
+                    -1,
+                )
+
+                # Determine bar color based on health
+                bar_color = (
+                    (0, 255, 0) if self.health > 10 else (0, 255, 255) if self.health > 5 else (0, 0, 255)
+                )
+
+                # Draw the current health bar
+                cv2.rectangle(
+                    frame,
+                    (bar_x, bar_y),
+                    (bar_x + current_bar_width, bar_y + bar_height),
+                    bar_color,
+                    -1,
+                )
+
+                # Add text for health
                 cv2.putText(
                     frame,
-                    str(self.health),
-                    (frame.shape[1] - 100, 50),
+                    f"Health: {self.health}/20",
+                    (bar_x, bar_y - 10),
                     cv2.FONT_HERSHEY_SIMPLEX,
+                    0.7,
+                    (255, 255, 255),
                     2,
-                    (0, 0, 0),
-                    3,
                 )
             else:
                 # Define the text
@@ -616,29 +651,20 @@ class VideoCamera(object):
                 # Font settings
                 font = cv2.FONT_HERSHEY_SIMPLEX
                 font_scale = 3
-                color = (0, 0, 225)  # Red color
+                color = (0, 0, 255)  # Red color
                 thickness = 5
 
                 # Get text size
-                (text_width, text_height), baseline = cv2.getTextSize(
-                    text, font, font_scale, thickness
-                )
+                (text_width, text_height), baseline = cv2.getTextSize(text, font, font_scale, thickness)
 
                 # Calculate the position for the text to appear in the center
                 frame_height, frame_width, _ = frame.shape
                 x = (frame_width - text_width) // 2
                 y = (frame_height + text_height) // 2
-                cv2.putText(
-                    frame,
-                    text,
-                    (x + 2, y + 2),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    font_scale,
-                    color,
-                    thickness,
-                )
+                cv2.putText(frame, text, (x + 2, y + 2), font, font_scale, color, thickness)
 
                 flag = False
+
             # Get the current time
             current_time = time.time()
 
@@ -700,15 +726,14 @@ class VideoCamera(object):
                     if punch_sound.play():  # Play sound with cooldown
                         punchanimation.trigger(left_hand_position)
                         self.cooldownBar.resetCooldown()
-                    self.multiplayerManager.sendPunch(
-                        (left_wrist.x, left_wrist.y))
+                    self.multiplayerManager.sendPunch((left_wrist.x, left_wrist.y))
+
                 if right_jab and not ignore_right and self.multiplayerManager:
                     ignore_right += 1
                     if punch_sound.play():  # Play sound with cooldown
                         punchanimation.trigger(left_hand_position)
                         self.cooldownBar.resetCooldown()
-                    self.multiplayerManager.sendPunch(
-                        (right_wrist.x, right_wrist.y))
+                    self.multiplayerManager.sendPunch((right_wrist.x, right_wrist.y))
 
             collisions = self.collisionObserver.getCollisionCount()
             self.eventManager.update(self.context)
@@ -719,6 +744,7 @@ class VideoCamera(object):
             # Display the game UI (commands and score)
             frame = punchanimation.draw(frame)
 
+            # Display the cooldown bar
             self.cooldownBar.displayCooldown(frame)
             self.cooldownBar.updateCooldown()
 
