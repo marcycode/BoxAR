@@ -58,7 +58,7 @@ context = {
     "observer": collisionObserver
 }
 
-duration = 100
+duration = 5
 start_time = datetime.now()
 
 while cap.isOpened():
