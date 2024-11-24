@@ -1,10 +1,11 @@
 import cv2
 import mediapipe as mp
 import time
+from block import Block
 from game_ui import GameUI
 from punch_detector import PunchDetector
 from sound_effect import SoundEffect
-from Speed import Speed
+from speed import Speed
 from datetime import datetime
 from punch_animation import PunchAnimation
 from challenge import ChallengeManager
@@ -15,7 +16,7 @@ from pygame import mixer
 import os
 
 punchanimation = PunchAnimation("assets/punchanimation.gif")
-
+block_detector = Block()
 
 background_music = mixer.Sound("assets/backgroundmusic.mp3")
 
@@ -236,11 +237,12 @@ while cap.isOpened():
                 game_ui.increment_score()
                 game_ui.clear_command()
 
-    collisions = collisionObserver.getCollisionCount()
-    eventManager.update(context)
-    drawManager.update(context)
-    if collisions == collisionObserver.getCollisionCount() - 1:
-        game_ui.decrement_score()
+        # if not block_detector.detectBlock(landmarks):
+        collisions = collisionObserver.getCollisionCount()
+        eventManager.update(context)
+        drawManager.update(context)
+        if collisions == collisionObserver.getCollisionCount() - 1:
+            game_ui.decrement_score()
 
     # Display the game UI (commands and score)
     frame = punchanimation.draw(frame)

@@ -8,7 +8,7 @@ import sys
 from game_ui import GameUI
 from punch_detector import PunchDetector
 from sound_effect import SoundEffect
-from Speed import Speed
+from speed import Speed
 from datetime import datetime
 from punch_animation import PunchAnimation
 from challenge import ChallengeManager
@@ -17,6 +17,7 @@ from update_hook import EventManager
 from observer import CollisionObserver
 from cv2constants import CV_VIDEO_CAPTURE_DEVICE
 import os
+from block import Block
 
 # Initialize MediaPipe pose detection
 mp_pose = mp.solutions.pose
@@ -27,6 +28,7 @@ pose = mp_pose.Pose(
     min_detection_confidence=0.5,
     min_tracking_confidence=0.5,
 )
+block = Block()
 
 mp_drawing = mp.solutions.drawing_utils
 

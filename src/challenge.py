@@ -5,8 +5,11 @@ import numpy as np
 from collision_detection import hitCriticalMass
 from block import Block
 import os
+from pygame import mixer
 
+mixer.init()
 
+collision_sound = mixer.Sound("assets/collisionsound.mp3")
 class Challenge():
     def __init__(self, name, image, observer=None):
         self.name = name
@@ -59,9 +62,10 @@ class PunchChallenge(Challenge):
                 f"Warning: PunchChallenge {self} could not overlay challenge on frame")
 
     def checkCollision(self, landmarks):
-        block = Block()
-        if hitCriticalMass(landmarks, (self.x, self.y), self.size // 2) and not block.detectBlock(landmarks):
+        block_detector = Block()
+        if hitCriticalMass(landmarks, (self.x, self.y), self.size // 2) and not block_detector.detectBlock(landmarks):
             self.expired = True
+            collision_sound.play()
             if self.observer:
                 self.observer.notify(self)
 

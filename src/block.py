@@ -2,7 +2,7 @@ from math import sqrt
 
 class Block:
     def __init__(self):
-        return
+        pass
 
     def calculate_distance(self, point1, point2):
         """Calculate Euclidean distance between two points."""
