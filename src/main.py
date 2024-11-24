@@ -66,6 +66,11 @@ duration = 30
 start_time = datetime.now()
 background_music.set_volume(1)
 background_music.play()
+
+# Set up the window to be full screen
+cv2.namedWindow("BoxAR", cv2.WND_PROP_FULLSCREEN)
+cv2.setWindowProperty("BoxAR", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
 while cap.isOpened():
    
     ret, frame = cap.read()
