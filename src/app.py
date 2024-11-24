@@ -4,17 +4,14 @@ from camera import VideoCamera
 from multiplayer import MultiPlayerConnectionData
 
 app = Flask(__name__)
-<<<<<<< HEAD
 camera_context: VideoCamera = None
 score = 0
 flag = True
-=======
 CORS(app)  # Enable CORS for all routes
 
 # Global variables
 score = 0
 video_camera_instance = None  # Initialize as None
->>>>>>> dd5d6dfc020ea4da3a46ba6335ddb56691262299
 
 
 @app.route("/")
