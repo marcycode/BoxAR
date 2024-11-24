@@ -14,7 +14,7 @@ createRoot(document.getElementById("root")!).render(
     <NavBar />
     <Routes>
       <Route path="/" element={<App />} />
-      <Route path="/free-play" element={<Play />} />
+      <Route path="/play" element={<Play />} />
       <Route path="/leaderboard" element={<Leaderboard />} />
       <Route path="select-mode" element={<SelectMode />} />
     </Routes>

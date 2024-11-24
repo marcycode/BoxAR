@@ -14,7 +14,7 @@ function SelectMode() {
           <Card className="rounded-xl">
             <CardContent
               className="flex w-[20vw] h-[20vw] hover:shadow-xl items-center justify-center p-6 bg-free-play bg-cover rounded-xl cursor-pointer"
-              onClick={() => navigate("/play")}
+              onClick={() => navigate("/play?mode=free-play")}
             >
               <span className="text-2xl font-semibold text-white">
                 Free Play
@@ -22,14 +22,20 @@ function SelectMode() {
             </CardContent>
           </Card>
           <Card className="rounded-xl">
-            <CardContent className="flex w-[20vw] h-[20vw] hover:shadow-xl items-center justify-center p-6 bg-scoring-mode bg-cover rounded-xl cursor-pointer">
+            <CardContent
+              className="flex w-[20vw] h-[20vw] hover:shadow-xl items-center justify-center p-6 bg-scoring-mode bg-cover rounded-xl cursor-pointer"
+              onClick={() => navigate("/play?mode=scoring-mode")}
+            >
               <span className="text-2xl font-semibold text-white">
                 Scoring Mode
               </span>
             </CardContent>
           </Card>
           <Card className="rounded-xl">
-            <CardContent className="flex w-[20vw] h-[20vw] hover:shadow-xl items-center justify-center p-6 bg-survival bg-cover rounded-xl cursor-pointer">
+            <CardContent
+              className="flex w-[20vw] h-[20vw] hover:shadow-xl items-center justify-center p-6 bg-survival bg-cover rounded-xl cursor-pointer"
+              onClick={() => navigate("/play?mode=survival")}
+            >
               <span className="text-2xl font-semibold text-white">
                 Survival
               </span>
