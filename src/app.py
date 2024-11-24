@@ -44,7 +44,8 @@ def restart():
         else:
             return "No active game instance to restart", 400
     except Exception as e:
-        print(f"Error during restart: {e}")  # Log the error to the server console
+        # Log the error to the server console
+        print(f"Error during restart: {e}")
         return f"An error occurred: {str(e)}", 500
 
 
@@ -68,6 +69,7 @@ def gen(camera, mode):
         yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n\r\n")
     video_camera_instance.restart()
 
+
 @app.route("/boxing_feed")
 def boxing_feed():
     global video_camera_instance  # Access the global instance
@@ -81,7 +83,7 @@ def boxing_feed():
         # TEMP TESTING CODE
         if mode == "multiplayer":
             multiplayerData = MultiPlayerConnectionData(
-                peer_ip="10.217.13.79", peer_port=8000
+                peer_ip="10.217.25.249", peer_port=8000
             )
         video_camera_instance = VideoCamera(
             page_width, page_height, multiplayerData=multiplayerData

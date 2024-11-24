@@ -11,9 +11,15 @@ class Observer(ABC):
 class CollisionObserver(Observer):
     def __init__(self):
         self.collisionCount = 0
+        self.callbacks = []
 
     def notify(self,  *args, **kwargs):
         self.collisionCount += 1
+        for callback in self.callbacks:
+            callback()
+
+    def registerCallback(self, callback):
+        self.callbacks.append(callback)
 
     def getCollisionCount(self):
         return self.collisionCount
