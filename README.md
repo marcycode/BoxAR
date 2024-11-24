@@ -5,8 +5,8 @@ BoxAR is an AR-based boxing game that helps you improve cardio and hand-eye coor
 ## Controls
 
 - Left/Right Jab
-- Left/Right Dodge
-- Duck
+- Dodge
+- Block
 
 ## Tech Stack
 
