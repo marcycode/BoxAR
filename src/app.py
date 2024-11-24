@@ -16,14 +16,16 @@ def ping():
 
 
 def gen(camera, mode):
-    while True:
+    flag = True
+    while flag:
         if mode == "survival":
-            frame = camera.survival_mode()
+            frame, flag = camera.survival_mode()
         elif mode == "scoring-mode":
-            frame = camera.score_mode()
+            frame, flag = camera.score_mode()
         elif mode == "free-play":
             frame = camera.free_mode()
         yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n\r\n")
+    del camera
 
 
 @app.route("/boxing_feed")
