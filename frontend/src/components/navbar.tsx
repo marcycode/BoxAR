@@ -22,7 +22,7 @@ export default function NavBar() {
         className="cursor-pointer"
         onClick={() => navigate("/")}
       />
-      {pathname == "/" ? (
+      {!pathname.includes("/play") ? (
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem className="cursor-pointer">
