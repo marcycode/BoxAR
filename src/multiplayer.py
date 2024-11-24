@@ -31,7 +31,8 @@ class MultiPlayerManager():
             return
         data = {"punchLocation": punchLocation}
         try:
-            requests.post(f"{self.peer_url}/api/punch", json=data)
+            requests.post(f"{self.peer_url}/api/punch",
+                          json=data, timeout=0.35)
             self.lastSentTime = time.time()
         except requests.ConnectionError:
             self.connected = False

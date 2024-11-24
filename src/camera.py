@@ -636,40 +636,24 @@ class VideoCamera(object):
                     right_average,
                 )
 
-                # Check for correct punches based on the current command
-                current_command = game_ui.current_command
-                if current_command == "Left Jab" and left_jab and not ignore_left:
+                if left_jab and not ignore_left and self.multiplayerManager:
                     ignore_left += 1
                     if punch_sound.play():  # Play sound with cooldown
                         punchanimation.trigger(left_hand_position)
-                        game_ui.increment_score()
-                        game_ui.clear_command()
-
-                elif current_command == "Right Jab" and right_jab and not ignore_right:
-                    ignore_right += 1
-                    if punch_sound.play():  # Play sound with cooldown
-                        punchanimation.trigger(right_hand_position)
-                        game_ui.increment_score()
-                        game_ui.clear_command()
-
-                # TEMP TESTING CODE
-                if left_jab and self.multiplayerManager:
                     self.multiplayerManager.sendPunch(
                         (left_wrist.x, left_wrist.y))
-                if right_jab and self.multiplayerManager:
+                if right_jab and not ignore_right and self.multiplayerManager:
+                    ignore_right += 1
+                    if punch_sound.play():  # Play sound with cooldown
+                        punchanimation.trigger(left_hand_position)
                     self.multiplayerManager.sendPunch(
                         (right_wrist.x, right_wrist.y))
 
             collisions = self.collisionObserver.getCollisionCount()
             self.eventManager.update(self.context)
             self.drawManager.update(self.context)
-            if collisions == self.collisionObserver.getCollisionCount() - 1:
+            if collisions <= self.collisionObserver.getCollisionCount() - 1:
                 self.health -= 1
-
-            # Display the game UI (commands and score)
-            frame = punchanimation.draw(frame)
-
-            frame = game_ui.display(frame)
 
             # Exit on pressing 'q'
             if cv2.waitKey(1) & 0xFF == ord("q"):
