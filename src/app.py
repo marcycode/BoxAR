@@ -81,7 +81,7 @@ def boxing_feed():
         # TEMP TESTING CODE
         if mode == "multiplayer":
             multiplayerData = MultiPlayerConnectionData(
-                peer_ip="10.217.13.79", peer_port=8080
+                peer_ip="10.217.13.79", peer_port=8000
             )
         video_camera_instance = VideoCamera(
             page_width, page_height, multiplayerData=multiplayerData
@@ -96,11 +96,11 @@ def boxing_feed():
 
 @app.post("/api/punch")
 def receive_punch():
-    global camera_context
+    global video_camera_instance
     data = request.json
     assert "punchLocation" in data
 
-    if not camera_context:
+    if not video_camera_instance:
         res = Response("Camera not initialized", status=500)
         return res
 
@@ -110,7 +110,7 @@ def receive_punch():
     except ValueError:
         res = Response("Invalid punch location", status=400)
         return res
-    camera_context.challengeManager.addPunchChallenge(
+    video_camera_instance.challengeManager.addPunchChallenge(
         data.get("punchLocation"), multiplayerPunch=True
     )
     return "Punch received"
