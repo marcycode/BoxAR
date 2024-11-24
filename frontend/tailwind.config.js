@@ -55,6 +55,7 @@ export default {
 				'free-play': "url('./src/assets/free-play.jpg')",
 				'scoring-mode': "url('./src/assets/scoring-mode.jpg')",
 				'survival': "url('./src/assets/survival.jpg')",
+				'multiplayer': "url('./src/assets/multiplayer.jpg')",
 			}
 		}
 	},

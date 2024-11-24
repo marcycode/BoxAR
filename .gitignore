@@ -7,6 +7,6 @@ oop/__pycache__/
 .vscode
 .vscode/
 
-boxAR-frontend/node_modules
-boxAR-frontend/package-lock.json
-boxAR-frontend/.vite
+frontend/node_modules
+frontend/package-lock.json
+frontend/.vite

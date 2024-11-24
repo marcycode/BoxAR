@@ -33,11 +33,21 @@ function SelectMode() {
           </Card>
           <Card className="rounded-xl">
             <CardContent
-              className="flex w-[20vw] h-[20vw] hover:shadow-xl items-center justify-center p-6 bg-survival bg-cover rounded-xl cursor-pointer"
+              className="flex w-[20vw] h-[20vw] hover:shadow-xl items-center justify-center p-6 bg-survival bg-center bg-cover rounded-xl cursor-pointer"
               onClick={() => navigate("/play?mode=survival")}
             >
               <span className="text-2xl font-semibold text-white">
                 Survival
+              </span>
+            </CardContent>
+          </Card>
+          <Card className="rounded-xl">
+            <CardContent
+              className="flex w-[20vw] h-[20vw] hover:shadow-xl items-center justify-center p-6 bg-multiplayer bg-center bg-cover rounded-xl cursor-pointer"
+              onClick={() => navigate("/play?mode=multiplayer")}
+            >
+              <span className="text-2xl font-semibold text-white">
+                Multiplayer
               </span>
             </CardContent>
           </Card>
