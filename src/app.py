@@ -4,6 +4,7 @@ from camera import VideoCamera
 
 app = Flask(__name__)
 score = 0
+flag = True
 
 
 @app.route("/")
@@ -18,10 +19,11 @@ def ping():
 @app.route("/score")
 def points():
     global score
-    return str(score)
+    global flag
+    return {"score": str(score), "finished": str(not flag)}
 
 def gen(camera, mode):
-    flag = True
+    global flag
     global score
     s = 0
     while flag:
