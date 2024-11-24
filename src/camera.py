@@ -411,7 +411,8 @@ class VideoCamera(object):
 
             if self.health > 0:
                 # Health Bar Dimensions
-                bar_x = 650  # X-coordinate of the health bar
+                # X-coordinate of the health bar
+                bar_x = (frame.shape[1] // 4) * 3
                 bar_y = 50  # Y-coordinate of the health bar
                 bar_width = 300  # Full width of the health bar
                 bar_height = 30  # Height of the health bar
@@ -599,7 +600,8 @@ class VideoCamera(object):
             # Display health bar
             if self.health > 0:
                 # Health Bar Dimensions
-                bar_x = 650  # X-coordinate of the health bar
+                # X-coordinate of the health bar
+                bar_x = (frame.shape[1] // 4) * 3
                 bar_y = 50  # Y-coordinate of the health bar
                 bar_width = 300  # Full width of the health bar
                 bar_height = 30  # Height of the health bar
@@ -651,13 +653,15 @@ class VideoCamera(object):
                 thickness = 5
 
                 # Get text size
-                (text_width, text_height), baseline = cv2.getTextSize(text, font, font_scale, thickness)
+                (text_width, text_height), baseline = cv2.getTextSize(
+                    text, font, font_scale, thickness)
 
                 # Calculate the position for the text to appear in the center
                 frame_height, frame_width, _ = frame.shape
                 x = (frame_width - text_width) // 2
                 y = (frame_height + text_height) // 2
-                cv2.putText(frame, text, (x + 2, y + 2), font, font_scale, color, thickness)
+                cv2.putText(frame, text, (x + 2, y + 2), font,
+                            font_scale, color, thickness)
 
                 flag = False
 
@@ -722,14 +726,16 @@ class VideoCamera(object):
                     if punch_sound.play():  # Play sound with cooldown
                         punchanimation.trigger(left_hand_position)
                         self.cooldownBar.resetCooldown()
-                    self.multiplayerManager.sendPunch((left_wrist.x, left_wrist.y))
+                    self.multiplayerManager.sendPunch(
+                        (left_wrist.x, left_wrist.y))
 
                 if right_jab and not ignore_right and self.multiplayerManager:
                     ignore_right += 1
                     if punch_sound.play():  # Play sound with cooldown
                         punchanimation.trigger(right_hand_position)
                         self.cooldownBar.resetCooldown()
-                    self.multiplayerManager.sendPunch((right_wrist.x, right_wrist.y))
+                    self.multiplayerManager.sendPunch(
+                        (right_wrist.x, right_wrist.y))
 
             collisions = self.collisionObserver.getCollisionCount()
             self.eventManager.update(self.context)
