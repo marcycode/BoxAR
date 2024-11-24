@@ -1,0 +1,85 @@
+/* Leaderboard.css */
+
+/* Style the leaderboard container */
+.leaderboard-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Move the content closer to the top */
+    align-items: center;
+    height: 100vh; /* Full viewport height */
+    padding: 1rem;
+    background: linear-gradient(135deg, #1e293b, #0f172a); /* Dark gradient background */
+    color: #ffffff; /* White text color */
+    font-family: 'Press Start 2P', cursive; /* Retro game-like font (Google Fonts) */
+    text-transform: uppercase;
+  }
+  
+  /* Style the leaderboard title */
+  .leaderboard-title {
+    font-size: 3rem; /* Larger font size */
+    margin-bottom: 1rem; /* Space below the title */
+    color: #ffcc00; /* Golden color for the title */
+    text-shadow: 2px 2px #000000; /* Shadow effect for depth */
+    animation: pulse 2s infinite; /* Add a pulsating animation */
+  }
+  
+  /* Add animation for the leaderboard title */
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+  }
+  
+  /* Style the leaderboard table */
+  .leaderboard-table {
+    width: 80%;
+    border-collapse: collapse;
+    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black background */
+    border: 3px solid #ffcc00; /* Golden border */
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  /* Style the table headers */
+  .leaderboard-table th {
+    font-size: 1.5rem;
+    padding: 1rem;
+    background-color: #ff4500; /* Vibrant orange header */
+    color: #ffffff;
+    border-bottom: 3px solid #ffcc00; /* Golden border below header */
+    text-shadow: 1px 1px #000000;
+  }
+  
+  /* Style the table rows */
+  .leaderboard-table tr:nth-child(odd) {
+    background-color: rgba(255, 255, 255, 0.1); /* Transparent white for odd rows */
+  }
+  
+  .leaderboard-table tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.4); /* Darker background for even rows */
+  }
+  
+  /* Style the table cells */
+  .leaderboard-table td {
+    font-size: 1.2rem;
+    padding: 0.8rem;
+    text-align: center;
+    color: #ffffff;
+    border: 1px solid #ffcc00; /* Thin golden border for cells */
+  }
+  
+  /* Hover effect for table rows */
+  .leaderboard-table tr:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: background-color 0.3s ease-in-out;
+  }
+  
+  /* Add some glow to the text */
+  .leaderboard-glow {
+    color: #ffcc00;
+    text-shadow: 0 0 5px #ffcc00, 0 0 10px #ffcc00, 0 0 15px #ff4500;
+  }
+  
