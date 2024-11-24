@@ -8,7 +8,7 @@ import sys
 from game_ui import GameUI
 from punch_detector import PunchDetector
 from sound_effect import SoundEffect
-from Speed import Speed
+from speed import Speed
 from datetime import datetime
 from punch_animation import PunchAnimation
 from challenge import ChallengeManager

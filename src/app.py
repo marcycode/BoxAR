@@ -1,8 +1,11 @@
 from flask import Flask, render_template, Response, request
+from flask_cors import CORS, cross_origin
 from camera import VideoCamera
 
 
 app = Flask(__name__)
+cors = CORS(app)  # allow CORS for all domains on all routes.
+app.config["CORS_HEADERS"] = "Content-Type"
 score = 0
 flag = True
 
@@ -16,11 +19,13 @@ def index():
 def ping():
     return "Successfully pinged"
 
+
 @app.route("/score")
 def points():
     global score
     global flag
     return {"score": str(score), "finished": str(not flag)}
+
 
 def gen(camera, mode):
     global flag
