@@ -130,6 +130,17 @@ while cap.isOpened():
             thickness,
         )
 
+        # Display the game UI (commands and score)
+        frame = punchanimation.draw(frame)
+
+        frame = game_ui.display(frame)
+
+        # Show the video feed
+        cv2.imshow("Punch Detection Game", frame)
+        cv2.waitKey(1)
+        time.sleep(3)
+        break
+
     # Update the game command
     game_ui.update_command()
 
@@ -148,7 +159,8 @@ while cap.isOpened():
             ignore_right = 0
         # Draw pose landmarks
         mp_drawing.draw_landmarks(
-            frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+            frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS
+        )
 
         # Extract landmarks
         landmarks = results.pose_landmarks.landmark
@@ -161,21 +173,38 @@ while cap.isOpened():
         right_hand = landmarks[mp_pose.PoseLandmark.LEFT_INDEX.value]
 
         right_wrist_position = (
-            right_wrist.x * frame.shape[1], right_wrist.y * frame.shape[0])
+            right_wrist.x * frame.shape[1],
+            right_wrist.y * frame.shape[0],
+        )
         left_wrist_position = (
-            left_wrist.x * frame.shape[1], left_wrist.y * frame.shape[0])
+            left_wrist.x * frame.shape[1],
+            left_wrist.y * frame.shape[0],
+        )
 
         right_hand_position = (
-            right_hand.x * frame.shape[1], right_hand.y * frame.shape[0])
+            right_hand.x * frame.shape[1],
+            right_hand.y * frame.shape[0],
+        )
         left_hand_position = (
-            left_hand.x * frame.shape[1], left_hand.y * frame.shape[0])
+            left_hand.x * frame.shape[1],
+            left_hand.y * frame.shape[0],
+        )
 
         right_average, left_average = speed.calculate_speeds(
             current_time, right_wrist_position, left_wrist_position)
+        right_average, left_average = speed.calculate_speeds(
+            current_time, right_wrist_position, left_wrist_position
+        )
 
         # Detect punches
-        left_jab, right_jab = punch_detector.detect_jab(left_wrist, left_shoulder, left_average,
-                                                        right_wrist, right_shoulder, right_average)
+        left_jab, right_jab = punch_detector.detect_jab(
+            left_wrist,
+            left_shoulder,
+            left_average,
+            right_wrist,
+            right_shoulder,
+            right_average,
+        )
 
         # Check for correct punches based on the current command
         current_command = game_ui.current_command
@@ -187,13 +216,14 @@ while cap.isOpened():
                 game_ui.increment_score()
                 game_ui.clear_command()
 
+
         elif current_command == "Right Jab" and right_jab and not ignore_right:
             ignore_right += 1
             if punch_sound.play():  # Play sound with cooldown
                 punchanimation.trigger(right_hand_position)
                 game_ui.increment_score()
                 game_ui.clear_command()
-
+                
     collisions = collisionObserver.getCollisionCount()
     eventManager.update(context)
     drawManager.update(context)
@@ -209,7 +239,7 @@ while cap.isOpened():
     cv2.imshow("Punch Detection Game", frame)
 
     # Exit on pressing 'q'
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    if cv2.waitKey(1) & 0xFF == ord("q"):
         break
 
 cap.release()

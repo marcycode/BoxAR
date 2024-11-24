@@ -94,9 +94,6 @@ class PunchAnimation:
         width = max(1, int(x2 - x1))
         height = max(1, int(y2 - y1))
 
-        # Debug dimensions
-        print(f"Resize dimensions: width={width}, height={height}, x1={x1}, y1={y1}, x2={x2}, y2={y2}")
-
         # Resize the GIF frame to fit within the ROI
         resized_frame = cv2.resize(gif_frame, (width, height), interpolation=cv2.INTER_AREA)
 

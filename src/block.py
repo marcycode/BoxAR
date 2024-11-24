@@ -1,5 +1,4 @@
 from math import sqrt
-from collision_detection import convertLandmarkToPoint
 
 class Block:
     def __init__(self):
@@ -16,31 +15,31 @@ class Block:
         Checks if elbows are tucked into shoulders and wrists are covering face
         """
         # Detect a "block" motion
-        left_wrist = convertLandmarkToPoint(landmarks[15])
-        left_elbow = convertLandmarkToPoint(landmarks[13])
-        left_shoulder = convertLandmarkToPoint(landmarks[11])
-        right_wrist = convertLandmarkToPoint(landmarks[16])
-        right_elbow = convertLandmarkToPoint(landmarks[14])
-        right_shoulder = convertLandmarkToPoint(landmarks[12])
-        nose = convertLandmarkToPoint(landmarks[0])
+        left_wrist = landmarks[15]
+        left_elbow = landmarks[13]
+        left_shoulder = landmarks[11]
+        right_wrist = landmarks[16]
+        right_elbow = landmarks[14]
+        right_shoulder = landmarks[12]
+        nose = landmarks[0]
         left_tuck = (
             self.calculate_distance(
-                [left_elbow[0], left_elbow[1]], [left_shoulder[0], left_shoulder[1]]
+                [left_elbow.x, left_elbow.y], [left_shoulder.x, left_shoulder.y]
             )
             < 0.15
         )
         right_tuck = (
             self.calculate_distance(
-                [right_elbow[0], right_elbow[0]], [right_shoulder[0], right_shoulder[1]]
+                [right_elbow.x, right_elbow.y], [right_shoulder.x, right_shoulder.y]
             )
             < 0.15
         )
 
         left_wrist_face = (
-            self.calculate_distance([left_wrist[0], left_wrist[1]], [nose[0], nose[1]]) < 0.15
+            self.calculate_distance([left_wrist.x, left_wrist.y], [nose.x, nose.y]) < 0.15
         )
         right_wrist_face = (
-            self.calculate_distance([right_wrist[0], right_wrist[1]], [nose[0], nose[1]]) < 0.15
+            self.calculate_distance([right_wrist.x, right_wrist.y], [nose.x, nose.y]) < 0.15
         )
 
         return left_tuck and right_tuck and left_wrist_face and right_wrist_face
