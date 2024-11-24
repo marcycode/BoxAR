@@ -25,7 +25,7 @@ def circleIntersectsWithLine(circleCoords, circleRadius, lineStart, lineEnd, fra
 
 
 def convertLandmarkToPoint(landmark):
-    return (int(landmark.x * int(os.getenv("FRAME_WIDTH"))), int(landmark.y * int(os.getenv("FRAME_WIDTH"))))
+    return (int(landmark.x * int(os.getenv("FRAME_WIDTH"))), int(landmark.y * int(os.getenv("FRAME_HEIGHT"))))
 
 
 def circleIntersectsWithRectangle(circleCoords, circleRadius, rectangleCoords):
