@@ -104,14 +104,14 @@ class VideoCamera(object):
             "startSize": CHALLENGE_START_SIZE,
             "observer": self.collisionObserver,
         }
-        self.health = 20
+        self.health = 5
         self.duration = 30  # Timer for scoring mode
         self.start_time = datetime.now()  # Initialize timer start time
         self.cooldownBar = CooldownBar(30)
 
     def restart(self):
         """Reset game state for both scoring and survival modes."""
-        self.health = 20  # Reset health for survival mode
+        self.health = 5  # Reset health for survival mode
         self.start_time = datetime.now()  # Reset timer for scoring mode
         game_ui.reset_score()  # Reset score
 
@@ -727,7 +727,7 @@ class VideoCamera(object):
                 if right_jab and not ignore_right and self.multiplayerManager:
                     ignore_right += 1
                     if punch_sound.play():  # Play sound with cooldown
-                        punchanimation.trigger(left_hand_position)
+                        punchanimation.trigger(right_hand_position)
                         self.cooldownBar.resetCooldown()
                     self.multiplayerManager.sendPunch((right_wrist.x, right_wrist.y))
 

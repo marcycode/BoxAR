@@ -83,7 +83,7 @@ def boxing_feed():
         # TEMP TESTING CODE
         if mode == "multiplayer":
             multiplayerData = MultiPlayerConnectionData(
-                peer_ip="10.217.25.249", peer_port=8000
+                peer_ip="10.217.13.79", peer_port=8000
             )
         video_camera_instance = VideoCamera(
             page_width, page_height, multiplayerData=multiplayerData
