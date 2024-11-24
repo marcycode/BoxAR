@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PuffLoader } from "react-spinners";
 import { useSearchParams } from "react-router";
 
@@ -11,6 +11,48 @@ function Play() {
   let page_height = window.innerHeight;
 
   const [gameloaded, setGameLoaded] = useState(false);
+
+  const pushToStorage = (name: string, score: number) => {
+    console.log("pushing new score");
+    const jsonData = JSON.parse(localStorage.getItem(name)!);
+
+    jsonData.push({
+      initials: "TST",
+      highscore: score,
+    });
+
+    console.log(jsonData);
+
+    const jsonString = JSON.stringify(jsonData);
+
+    localStorage.setItem(name, jsonString);
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch("http://localhost:8000/score")
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to fetch high scores");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          if (data.finished == "True") {
+            if (mode == "scoring-mode") {
+              pushToStorage("highscores", data.score);
+              clearInterval(interval);
+            } else if (mode == "survival") {
+              pushToStorage("survivalScores", data.score);
+              clearInterval(interval);
+            }
+          }
+        })
+        .catch((error) => console.error("Error saving score", error));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Function to restart the game
   const restartGame = async () => {
@@ -36,7 +78,7 @@ function Play() {
       <div className="flex flex-col w-[100vw] justify-center items-center text-center">
         {/* Loader while the game is loading */}
         {gameloaded ? null : <PuffLoader size={400} color="#e53e3e" />}
-        
+
         {/* Game feed */}
         <img
           onLoad={() => setGameLoaded(true)}

@@ -8,7 +8,7 @@ import sys
 from game_ui import GameUI
 from punch_detector import PunchDetector
 from sound_effect import SoundEffect
-from Speed import Speed
+from speed import Speed
 from datetime import datetime
 from punch_animation import PunchAnimation
 from challenge import ChallengeManager
@@ -25,7 +25,7 @@ pose = mp_pose.Pose(
     model_complexity=1,
     smooth_landmarks=True,
     min_detection_confidence=0.5,
-    min_tracking_confidence=0.5
+    min_tracking_confidence=0.5,
 )
 
 mp_drawing = mp.solutions.drawing_utils
@@ -48,15 +48,15 @@ start_time = datetime.now()
 
 
 class VideoCamera(object):
-    def __init__(self, page_width, page_height, multiplayerData: MultiPlayerConnectionData = None):
+    def __init__(
+        self, page_width, page_height, multiplayerData: MultiPlayerConnectionData = None
+    ):
         self.video = cv2.VideoCapture(CV_VIDEO_CAPTURE_DEVICE)
         # FIX BELOW
         self.video.set(3, page_width / 1.75)  # 3 -> WIDTH
         self.video.set(4, page_height / 1.75)  # 4 -> HEIGHT
-        FRAME_WIDTH = int(self.video.get(
-            cv2.CAP_PROP_FRAME_WIDTH))  # int `width`
-        FRAME_HEIGHT = int(self.video.get(
-            cv2.CAP_PROP_FRAME_HEIGHT))  # int `height`
+        FRAME_WIDTH = int(self.video.get(cv2.CAP_PROP_FRAME_WIDTH))  # int `width`
+        FRAME_HEIGHT = int(self.video.get(cv2.CAP_PROP_FRAME_HEIGHT))  # int `height`
         CHALLENGE_START_SIZE = 50
 
         os.environ["FRAME_WIDTH"] = f"{FRAME_WIDTH}"
@@ -68,7 +68,10 @@ class VideoCamera(object):
         self.multiplayerManager = None
         if multiplayerData:
             self.multiplayerManager = MultiPlayerManager(
-                multiplayerData.peer_ip, multiplayerData.peer_port, self.challengeManager)
+                multiplayerData.peer_ip,
+                multiplayerData.peer_port,
+                self.challengeManager,
+            )
 
         self.eventManager = EventManager()
         if not multiplayerData:
@@ -87,8 +90,7 @@ class VideoCamera(object):
 
         self.drawManager = EventManager()
         self.drawManager.addEvent(
-            "draw_challenges", 1, self.challengeManager.drawChallenges, [
-                "frame"]
+            "draw_challenges", 1, self.challengeManager.drawChallenges, ["frame"]
         )
         self.context = {
             "frameWidth": FRAME_WIDTH,
@@ -99,14 +101,12 @@ class VideoCamera(object):
         self.health = 20
         self.duration = 30  # Timer for scoring mode
         self.start_time = datetime.now()  # Initialize timer start time
-    
 
     def restart(self):
         """Reset game state for both scoring and survival modes."""
         self.health = 20  # Reset health for survival mode
         self.start_time = datetime.now()  # Reset timer for scoring mode
         game_ui.reset_score()  # Reset score
-
 
     def __del__(self):
         self.video.release()
@@ -655,14 +655,12 @@ class VideoCamera(object):
                     ignore_left += 1
                     if punch_sound.play():  # Play sound with cooldown
                         punchanimation.trigger(left_hand_position)
-                    self.multiplayerManager.sendPunch(
-                        (left_wrist.x, left_wrist.y))
+                    self.multiplayerManager.sendPunch((left_wrist.x, left_wrist.y))
                 if right_jab and not ignore_right and self.multiplayerManager:
                     ignore_right += 1
                     if punch_sound.play():  # Play sound with cooldown
                         punchanimation.trigger(left_hand_position)
-                    self.multiplayerManager.sendPunch(
-                        (right_wrist.x, right_wrist.y))
+                    self.multiplayerManager.sendPunch((right_wrist.x, right_wrist.y))
 
             collisions = self.collisionObserver.getCollisionCount()
             self.eventManager.update(self.context)
