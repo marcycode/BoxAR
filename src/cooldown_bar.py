@@ -20,10 +20,10 @@ class CooldownBar():
 
         # Cooldown Bar Dimensions
         bar_width = 300
-        bar_height = 30
+        bar_height = 10
 
         bar_x = frame.shape[1] // 2 - bar_width // 2
-        bar_y = 50
+        bar_y = frame.shape[0] - 25
 
         # Calculate current cooldown bar width
         current_bar_width = int(
