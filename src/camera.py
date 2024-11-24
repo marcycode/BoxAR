@@ -38,37 +38,45 @@ ignore_left, ignore_right = 0, 0
 duration = 100
 start_time = datetime.now()
 
+
 class VideoCamera(object):
     def __init__(self, page_width, page_height):
         self.video = cv2.VideoCapture(CV_VIDEO_CAPTURE_DEVICE)
         # FIX BELOW
         self.video.set(3, page_width / 1.75)  # 3 -> WIDTH
         self.video.set(4, page_height / 1.75)  # 4 -> HEIGHT
-        FRAME_WIDTH = int(self.video.get(cv2.CAP_PROP_FRAME_WIDTH))   # int `width`
+        FRAME_WIDTH = int(self.video.get(cv2.CAP_PROP_FRAME_WIDTH))  # int `width`
         FRAME_HEIGHT = int(self.video.get(cv2.CAP_PROP_FRAME_HEIGHT))  # int `height`
         CHALLENGE_START_SIZE = 50
 
         os.environ["FRAME_WIDTH"] = f"{FRAME_WIDTH}"
         os.environ["FRAME_HEIGHT"] = f"{FRAME_HEIGHT}"
 
-
         self.collisionObserver = CollisionObserver()
         self.challengeManager = ChallengeManager()
         self.eventManager = EventManager()
-        self.eventManager.addEvent("generatePunchChallenge", 100,
-                            self.challengeManager.generatePunchChallenge,
-                            ["frameWidth", "frameHeight", "startSize", "observer"])
-        self.eventManager.addEvent("update_challenges", 4,
-                            self.challengeManager.update_challenges, ["landmarks"])
+        self.eventManager.addEvent(
+            "generatePunchChallenge",
+            100,
+            self.challengeManager.generatePunchChallenge,
+            ["frameWidth", "frameHeight", "startSize", "observer"],
+        )
+        self.eventManager.addEvent(
+            "update_challenges",
+            4,
+            self.challengeManager.update_challenges,
+            ["landmarks"],
+        )
 
         self.drawManager = EventManager()
-        self.drawManager.addEvent("draw_challenges", 1,
-                            self.challengeManager.drawChallenges, ["frame"])
+        self.drawManager.addEvent(
+            "draw_challenges", 1, self.challengeManager.drawChallenges, ["frame"]
+        )
         self.context = {
             "frameWidth": FRAME_WIDTH,
             "frameHeight": FRAME_HEIGHT,
             "startSize": CHALLENGE_START_SIZE,
-            "observer": self.collisionObserver
+            "observer": self.collisionObserver,
         }
         self.health = 20
 
@@ -215,7 +223,7 @@ class VideoCamera(object):
                         punchanimation.trigger(right_hand_position)
                         game_ui.increment_score()
                         game_ui.clear_command()
-            
+
             collisions = self.collisionObserver.getCollisionCount()
             self.eventManager.update(self.context)
             self.drawManager.update(self.context)
@@ -332,15 +340,13 @@ class VideoCamera(object):
             # Display the game UI (commands and score)
             frame = punchanimation.draw(frame)
 
-            frame = game_ui.display(frame)
-
             # Exit on pressing 'q'
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
             ret, jpeg = cv2.imencode(".jpg", frame)
             return jpeg.tobytes()
-        
+
     def survival_mode(self):
         global ignore_left, ignore_right
         while self.video.isOpened():
@@ -476,13 +482,13 @@ class VideoCamera(object):
                         punchanimation.trigger(right_hand_position)
                         game_ui.increment_score()
                         game_ui.clear_command()
-            
+
             collisions = self.collisionObserver.getCollisionCount()
             self.eventManager.update(self.context)
             self.drawManager.update(self.context)
             if collisions == self.collisionObserver.getCollisionCount() - 1:
                 self.health -= 1
-            
+
             # Display the game UI (commands and score)
             frame = punchanimation.draw(frame)
 
