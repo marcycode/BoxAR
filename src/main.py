@@ -58,7 +58,7 @@ context = {
     "observer": collisionObserver
 }
 
-duration = 5
+duration = 30
 start_time = datetime.now()
 
 while cap.isOpened():
@@ -146,9 +146,6 @@ while cap.isOpened():
             ignore_right += 1
         else:
             ignore_right = 0
-        # Draw pose landmarks
-        mp_drawing.draw_landmarks(
-            frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
 
         # Extract landmarks
         landmarks = results.pose_landmarks.landmark
