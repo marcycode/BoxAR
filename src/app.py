@@ -6,7 +6,6 @@ from multiplayer import MultiPlayerConnectionData
 app = Flask(__name__)
 cors = CORS(app)  # allow CORS for all domains on all routes.
 app.config["CORS_HEADERS"] = "Content-Type"
-camera_context: VideoCamera = None
 score = 0
 flag = True
 CORS(app)  # Enable CORS for all routes
