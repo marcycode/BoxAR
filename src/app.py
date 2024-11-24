@@ -13,6 +13,7 @@ CORS(app)  # Enable CORS for all routes
 # Global variables
 score = 0
 video_camera_instance = None  # Initialize as None
+mode = ""
 
 
 @app.route("/")
@@ -49,30 +50,42 @@ def restart():
         return f"An error occurred: {str(e)}", 500
 
 
-def gen(camera, mode):
+def gen(mode, page_width, page_height):
     global flag
     global score
+    global video_camera_instance
+    del video_camera_instance
+    multiplayerData = None
+    if mode == "multiplayer":
+        multiplayerData = MultiPlayerConnectionData(
+            peer_ip="10.217.13.79", peer_port=8000
+        )
+    video_camera_instance = VideoCamera(
+        page_width, page_height, multiplayerData=multiplayerData
+    )
     s = 0
     while flag:
         if mode == "survival":
-            frame, flag, s = camera.survival_mode()
+            frame, flag, s = video_camera_instance.survival_mode()
         elif mode == "scoring-mode":
-            frame, flag, s = camera.score_mode()
+            frame, flag, s = video_camera_instance.score_mode()
         elif mode == "free-play":
-            frame = camera.free_mode()
+            frame = video_camera_instance.free_mode()
         elif mode == "multiplayer":
             # TODO add multiplayer mode logic
-            frame, flag = camera.multiplayer_mode()
+            frame, flag = video_camera_instance.multiplayer_mode()
         else:
-            frame = camera.free_mode()
+            frame = video_camera_instance.free_mode()
         score = s
         yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n\r\n")
-    video_camera_instance.restart()
 
 
 @app.route("/boxing_feed")
 def boxing_feed():
     global video_camera_instance  # Access the global instance
+    global mode
+    global flag
+    flag = True
     mode = request.args.get("mode")
     if mode is None:
         mode = "free-play"
@@ -89,7 +102,7 @@ def boxing_feed():
             page_width, page_height, multiplayerData=multiplayerData
         )
     response = Response(
-        gen(video_camera_instance, mode),
+        gen(mode, page_width, page_height),
         mimetype="multipart/x-mixed-replace; boundary=frame",
     )
     response.headers.add("Access-Control-Allow-Origin", "*")
@@ -98,6 +111,9 @@ def boxing_feed():
 
 @app.post("/api/punch")
 def receive_punch():
+    global mode
+    if mode != "multiplayer":
+        return
     global video_camera_instance
     data = request.json
     assert "punchLocation" in data

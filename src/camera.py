@@ -115,6 +115,10 @@ class VideoCamera(object):
         self.health = MAX_HEALTH  # Reset health for survival mode
         self.start_time = datetime.now()  # Reset timer for scoring mode
         game_ui.reset_score()  # Reset score
+    
+    def __del__(self):
+        self.video.release()
+        cv2.destroyAllWindows()
 
     def score_mode(self):
         global ignore_left, ignore_right
