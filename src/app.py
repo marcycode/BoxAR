@@ -24,8 +24,8 @@ def gen(camera, mode):
         elif mode == "free-play":
             frame = camera.free_mode()
         elif mode == "multiplayer":
-            # TODO add multiplayer mode
-            frame = camera.free_mode()
+            # TODO add multiplayer mode logic
+            frame = camera.multiplayer_mode()
         else:
             frame = camera.free_mode()
         yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n\r\n")
