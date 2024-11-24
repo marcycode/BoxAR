@@ -15,10 +15,11 @@ function Play() {
 
   const pushToStorage = (name: string, score: number) => {
     console.log("pushing new score");
+    let username = prompt("Enter your username: ");
     const jsonData = JSON.parse(localStorage.getItem(name)!);
 
     jsonData.push({
-      initials: "TST",
+      initials: username,
       highscore: score,
     });
 
@@ -31,25 +32,27 @@ function Play() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      fetch("http://localhost:8000/score")
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Failed to fetch high scores");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          if (data.finished == "True") {
-            if (mode == "scoring-mode") {
-              pushToStorage("highscores", data.score);
-              clearInterval(interval);
-            } else if (mode == "survival") {
-              pushToStorage("survivalScores", data.score);
-              clearInterval(interval);
+      if (mode == "scoring-mode" || mode == "survival") {
+        fetch("http://localhost:8000/score")
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Failed to fetch high scores");
             }
-          }
-        })
-        .catch((error) => console.error("Error saving score", error));
+            return response.json();
+          })
+          .then((data) => {
+            if (data.finished == "True") {
+              if (mode == "scoring-mode") {
+                pushToStorage("highscores", data.score);
+                clearInterval(interval);
+              } else if (mode == "survival") {
+                pushToStorage("survivalScores", data.score);
+                clearInterval(interval);
+              }
+            }
+          })
+          .catch((error) => console.error("Error saving score", error));
+      }
     }, 1000);
 
     return () => clearInterval(interval);
