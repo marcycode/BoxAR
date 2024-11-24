@@ -18,6 +18,8 @@ punchanimation = PunchAnimation("assets/punchanimation.gif")
 
 background_music = mixer.Sound("assets/backgroundmusic.mp3")
 
+game_over = mixer.Sound("assets/gameover.mp3")
+
 QUEUE_SIZE = 10
 COOLDOWN = 0
 
@@ -103,8 +105,11 @@ while cap.isOpened():
             3,
         )
     else:
+        background_music.stop()
+        game_over.play()
         # Define the text
         text = "GAME OVER!"
+        
 
         # Font settings
         font = cv2.FONT_HERSHEY_SIMPLEX
