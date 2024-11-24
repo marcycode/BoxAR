@@ -20,7 +20,14 @@ import os
 
 # Initialize MediaPipe pose detection
 mp_pose = mp.solutions.pose
-pose = mp_pose.Pose()
+pose = mp_pose.Pose(
+    static_image_mode=False,
+    model_complexity=1,
+    smooth_landmarks=True,
+    min_detection_confidence=0.5,
+    min_tracking_confidence=0.5
+)
+
 mp_drawing = mp.solutions.drawing_utils
 
 punchanimation = PunchAnimation("assets/punchanimation.gif")
@@ -90,6 +97,16 @@ class VideoCamera(object):
             "observer": self.collisionObserver,
         }
         self.health = 20
+        self.duration = 30  # Timer for scoring mode
+        self.start_time = datetime.now()  # Initialize timer start time
+    
+
+    def restart(self):
+        """Reset game state for both scoring and survival modes."""
+        self.health = 20  # Reset health for survival mode
+        self.start_time = datetime.now()  # Reset timer for scoring mode
+        game_ui.reset_score()  # Reset score
+
 
     def __del__(self):
         self.video.release()
@@ -115,9 +132,7 @@ class VideoCamera(object):
             self.context["landmarks"] = results.pose_landmarks
 
             # Get time and show timer
-            active_time = (
-                duration - (datetime.now() - start_time).seconds
-            )  # converting into seconds
+            active_time = self.duration - (datetime.now() - self.start_time).seconds
 
             if active_time > 0:
                 cv2.putText(
