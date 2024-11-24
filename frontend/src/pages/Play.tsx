@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { PuffLoader } from "react-spinners";
-import { useSearchParams } from "react-router";
+import { useSearchParams, useNavigate } from "react-router-dom"; // Import useNavigate
 
 function Play() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate(); // Initialize the navigate function
 
   const mode = searchParams.get("mode");
 
@@ -88,13 +89,22 @@ function Play() {
         />
       </div>
 
-      {/* Restart Game Button */}
-      <div className="flex justify-center mt-8">
+      {/* Navigation Buttons */}
+      <div className="flex justify-center mt-8 space-x-4">
+        {/* Restart Game Button */}
         <button
           onClick={restartGame}
           className="px-6 py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 shadow-md"
         >
           Restart Game
+        </button>
+
+        {/* Back to Select Mode Button */}
+        <button
+          onClick={() => navigate("/select-mode")} // Navigate to select-mode
+          className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 shadow-md"
+        >
+          Back to Select Mode
         </button>
       </div>
     </>

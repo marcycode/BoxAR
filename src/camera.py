@@ -8,7 +8,7 @@ import sys
 from game_ui import GameUI
 from punch_detector import PunchDetector
 from sound_effect import SoundEffect
-from speed import Speed
+from Speed import Speed
 from datetime import datetime
 from punch_animation import PunchAnimation
 from challenge import ChallengeManager
@@ -272,7 +272,7 @@ class VideoCamera(object):
         while self.video.isOpened():
             ret, frame = self.video.read()
             if not ret:
-                print("Error accessing the camera.")
+                print("Error accessing the camera in free_mode.")
                 break
 
             # Flip the frame for a mirrored view
@@ -281,6 +281,10 @@ class VideoCamera(object):
 
             # Process the frame with MediaPipe
             results = pose.process(rgb_frame)
+            if results.pose_landmarks:
+                print("Landmarks detected.")  # Debug line
+            else:
+                print("No landmarks detected.")  # Debug line
 
             self.context["frame"] = frame
             self.context["landmarks"] = results.pose_landmarks
@@ -298,79 +302,31 @@ class VideoCamera(object):
                     ignore_right += 1
                 else:
                     ignore_right = 0
+
                 # Draw pose landmarks
                 mp_drawing.draw_landmarks(
                     frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS
                 )
 
-                # Extract landmarks
-                landmarks = results.pose_landmarks.landmark
-                left_wrist = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value]
-                left_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
-                left_hand = landmarks[mp_pose.PoseLandmark.RIGHT_INDEX.value]
-
-                right_wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
-                right_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
-                right_hand = landmarks[mp_pose.PoseLandmark.LEFT_INDEX.value]
-
-                right_wrist_position = (
-                    right_wrist.x * frame.shape[1],
-                    right_wrist.y * frame.shape[0],
-                )
-                left_wrist_position = (
-                    left_wrist.x * frame.shape[1],
-                    left_wrist.y * frame.shape[0],
-                )
-
-                right_hand_position = (
-                    right_hand.x * frame.shape[1],
-                    right_hand.y * frame.shape[0],
-                )
-                left_hand_position = (
-                    left_hand.x * frame.shape[1],
-                    left_hand.y * frame.shape[0],
-                )
-
-                right_average, left_average = speed.calculate_speeds(
-                    current_time, right_wrist_position, left_wrist_position
-                )
-
-                # Detect punches
-                left_jab, right_jab = punch_detector.detect_jab(
-                    left_wrist,
-                    left_shoulder,
-                    left_average,
-                    right_wrist,
-                    right_shoulder,
-                    right_average,
-                )
-
-                # Check for correct punches based on the current command
-                if left_jab and not ignore_left:
-                    ignore_left += 1
-                    if punch_sound.play():  # Play sound with cooldown
-                        punchanimation.trigger(left_hand_position)
-
-                elif right_jab and not ignore_right:
-                    ignore_right += 1
-                    if punch_sound.play():  # Play sound with cooldown
-                        punchanimation.trigger(right_hand_position)
-
-            collisions = self.collisionObserver.getCollisionCount()
-            self.eventManager.update(self.context)
-            self.drawManager.update(self.context)
-            if collisions == self.collisionObserver.getCollisionCount() - 1:
-                game_ui.decrement_score()
-
-            # Display the game UI (commands and score)
+            # Update the game frame with animations and UI
             frame = punchanimation.draw(frame)
+            frame = game_ui.display(frame)
+
+            try:
+                ret, jpeg = cv2.imencode(".jpg", frame)
+               
+            except Exception as e:
+                print(f"Error encoding frame: {e}")
+                continue
 
             # Exit on pressing 'q'
             if cv2.waitKey(1) & 0xFF == ord("q"):
+                print("Exiting free_mode.")
                 break
 
-            ret, jpeg = cv2.imencode(".jpg", frame)
             return jpeg.tobytes()
+
+    
 
     def survival_mode(self):
         global ignore_left, ignore_right
