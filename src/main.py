@@ -213,6 +213,11 @@ while cap.isOpened():
                 game_ui.increment_score()
                 game_ui.clear_command()
                 
+    collisions = collisionObserver.getCollisionCount()
+    eventManager.update(context)
+    drawManager.update(context)
+    if collisions == collisionObserver.getCollisionCount() - 1:
+        game_ui.decrement_score()
 
     # Display the game UI (commands and score)
     frame = punchanimation.draw(frame)
