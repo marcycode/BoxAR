@@ -3,6 +3,7 @@ from camera import VideoCamera
 
 
 app = Flask(__name__)
+score = 0
 
 
 @app.route("/")
@@ -14,16 +15,22 @@ def index():
 def ping():
     return "Successfully pinged"
 
+@app.route("/score")
+def points():
+    global score
+    return str(score)
 
 def gen(camera, mode):
     flag = True
+    global score
     while flag:
         if mode == "survival":
-            frame, flag = camera.survival_mode()
+            frame, flag, s = camera.survival_mode()
         elif mode == "scoring-mode":
-            frame, flag = camera.score_mode()
+            frame, flag, s = camera.score_mode()
         elif mode == "free-play":
             frame = camera.free_mode()
+        score = s
         yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n\r\n")
     del camera
 

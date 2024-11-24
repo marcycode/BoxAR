@@ -239,7 +239,7 @@ class VideoCamera(object):
             frame = game_ui.display(frame)
 
             ret, jpeg = cv2.imencode(".jpg", frame)
-            return jpeg.tobytes(), flag
+            return jpeg.tobytes(), flag, game_ui.score
 
     def free_mode(self):
         global ignore_left, ignore_right
@@ -499,4 +499,4 @@ class VideoCamera(object):
                 break
 
             ret, jpeg = cv2.imencode(".jpg", frame)
-            return jpeg.tobytes(), flag
+            return jpeg.tobytes(), flag, game_ui.score
