@@ -7,11 +7,16 @@ from sound_effect import SoundEffect
 from Speed import Speed
 from datetime import datetime
 from punchanimation import PunchAnimation
+from challenge import ChallengeManager
+from update_hook import EventManager
+from observer import CollisionObserver
+import os
 
 punchanimation = PunchAnimation("assets/punchanimation.gif")
 
 QUEUE_SIZE = 10
 COOLDOWN = 0
+
 # Initialize components
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
@@ -20,14 +25,40 @@ mp_drawing = mp.solutions.drawing_utils
 game_ui = GameUI()
 punch_detector = PunchDetector()
 speed = Speed(QUEUE_SIZE)
-punch_sound = SoundEffect(
-    "assets/Punch.mp3", cooldown=1.0
-)  # Set a 1-second cooldown for the punch sound
+# Set a 1-second cooldown for the punch sound
+punch_sound = SoundEffect("assets/Punch.mp3", cooldown=1.0)
 ignore_left, ignore_right = 0, 0
 # Open webcam
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
-duration = 100
+FRAME_WIDTH = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))   # int `width`
+FRAME_HEIGHT = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))  # int `height`
+CHALLENGE_START_SIZE = 50
+
+os.environ["FRAME_WIDTH"] = f"{FRAME_WIDTH}"
+os.environ["FRAME_HEIGHT"] = f"{FRAME_HEIGHT}"
+
+
+collisionObserver = CollisionObserver()
+challengeManager = ChallengeManager()
+eventManager = EventManager()
+eventManager.addEvent("generatePunchChallenge", 100,
+                      challengeManager.generatePunchChallenge,
+                      ["frameWidth", "frameHeight", "startSize", "observer"])
+eventManager.addEvent("update_challenges", 4,
+                      challengeManager.update_challenges, ["landmarks"])
+
+drawManager = EventManager()
+drawManager.addEvent("draw_challenges", 1,
+                     challengeManager.drawChallenges, ["frame"])
+context = {
+    "frameWidth": FRAME_WIDTH,
+    "frameHeight": FRAME_HEIGHT,
+    "startSize": CHALLENGE_START_SIZE,
+    "observer": collisionObserver
+}
+
+duration = 30
 start_time = datetime.now()
 
 while cap.isOpened():
@@ -43,10 +74,12 @@ while cap.isOpened():
     # Process the frame with MediaPipe
     results = pose.process(rgb_frame)
 
+    context["frame"] = frame
+    context["landmarks"] = results.pose_landmarks
+
     # Get time and show timer
-    active_time = (
-        duration - (datetime.now() - start_time).seconds
-    )  # converting into seconds
+    # converting into seconds
+    active_time = duration - (datetime.now() - start_time).seconds
 
     if active_time > 0:
         cv2.putText(
@@ -70,8 +103,7 @@ while cap.isOpened():
 
         # Get text size
         (text_width, text_height), baseline = cv2.getTextSize(
-            text, font, font_scale, thickness
-        )
+            text, font, font_scale, thickness)
 
         # Calculate the position for the text to appear in the center
         frame_height, frame_width, _ = frame.shape
@@ -86,6 +118,17 @@ while cap.isOpened():
             color,
             thickness,
         )
+
+        # Display the game UI (commands and score)
+        frame = punchanimation.draw(frame)
+
+        frame = game_ui.display(frame)
+
+        # Show the video feed
+        cv2.imshow("Punch Detection Game", frame)
+        cv2.waitKey(1)
+        time.sleep(3)
+        break
 
     # Update the game command
     game_ui.update_command()
@@ -137,6 +180,8 @@ while cap.isOpened():
         )
 
         right_average, left_average = speed.calculate_speeds(
+            current_time, right_wrist_position, left_wrist_position)
+        right_average, left_average = speed.calculate_speeds(
             current_time, right_wrist_position, left_wrist_position
         )
 
@@ -152,6 +197,7 @@ while cap.isOpened():
 
         # Check for correct punches based on the current command
         current_command = game_ui.current_command
+        # current_command = "Dodge"
         if current_command == "Left Jab" and left_jab and not ignore_left:
             ignore_left += 1
             if punch_sound.play():  # Play sound with cooldown
@@ -159,12 +205,19 @@ while cap.isOpened():
                 game_ui.increment_score()
                 game_ui.clear_command()
 
+
         elif current_command == "Right Jab" and right_jab and not ignore_right:
             ignore_right += 1
             if punch_sound.play():  # Play sound with cooldown
                 punchanimation.trigger(right_hand_position)
                 game_ui.increment_score()
                 game_ui.clear_command()
+                
+    collisions = collisionObserver.getCollisionCount()
+    eventManager.update(context)
+    drawManager.update(context)
+    if collisions == collisionObserver.getCollisionCount() - 1:
+        game_ui.decrement_score()
 
     # Display the game UI (commands and score)
     frame = punchanimation.draw(frame)

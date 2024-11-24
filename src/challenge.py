@@ -3,6 +3,8 @@ import cv2
 import numpy as np
 
 from collision_detection import hitCriticalMass
+from block import Block
+import os
 
 
 class Challenge():
@@ -14,8 +16,8 @@ class Challenge():
 
 
 class PunchChallenge(Challenge):
-    END_SIZE = 600
-    BASE_IMG = cv2.imread("glove.png")
+    END_SIZE = int(os.getenv("FRAME_WIDTH", "400")) // 3
+    BASE_IMG = cv2.imread("assets/glove.png")
 
     def __init__(self, x: int, y: int, startSize: int, timeToLive=3, observer=None):
         super().__init__("Punch Challenge", PunchChallenge.BASE_IMG, observer)
@@ -43,9 +45,6 @@ class PunchChallenge(Challenge):
         self.image = cv2.resize(PunchChallenge.BASE_IMG,
                                 (size, size))
         adjustmentPixel = 1 if size % 2 != 0 else 0
-        print(np.shape(frame[y - size // 2: y + size //
-                             2, x - size // 2: x + size // 2]))
-        print(np.shape(self.image))
         frame[y - size // 2: y + size // 2 + adjustmentPixel, x - size // 2: x + size // 2 + adjustmentPixel] = cv2.addWeighted(
             frame[y - size // 2: y + size // 2 + adjustmentPixel, x - size // 2: x + size // 2 + adjustmentPixel], 1.0, self.image, 1.0, 1)
 
@@ -53,7 +52,8 @@ class PunchChallenge(Challenge):
                    2, (0, 0, 255), 2)
 
     def checkCollision(self, landmarks):
-        if hitCriticalMass(landmarks, (self.x, self.y), self.size // 2):
+        block = Block()
+        if hitCriticalMass(landmarks, (self.x, self.y), self.size // 2) and not block.detectBlock(landmarks):
             self.expired = True
             if self.observer:
                 self.observer.notify(self)
@@ -77,10 +77,11 @@ class ChallengeManager():
         # handle collisions
 
     def generatePunchChallenge(self, frameWidth=1920, frameHeight=1080, startSize=50, timeToLive=5, observer=None):
-        x = random.randint(PunchChallenge.END_SIZE // 2 + 1,
-                           frameWidth - PunchChallenge.END_SIZE)
-        y = random.randint(PunchChallenge.END_SIZE // 2 + 1,
-                           frameHeight - PunchChallenge.END_SIZE)
+        endSize = frameWidth // 4
+        x = random.randint((endSize) // 2 + 1,
+                           frameWidth - endSize)
+        y = random.randint(endSize // 2 + 1,
+                           frameHeight - endSize)
         challenge = PunchChallenge(x, y, startSize, timeToLive, observer)
         self.challenges.append(challenge)
         return challenge

@@ -8,7 +8,7 @@ class GameUI:
         self.current_command = None
         self.last_command_time = time.time()
         self.command_interval = 3  # Command update interval in seconds
-        self.commands = ["Left Jab", "Right Jab",]
+        self.commands = ["Left Jab", "Right Jab"]
 
     def update_command(self):
         """Generate a new command if the interval has elapsed."""
@@ -23,6 +23,10 @@ class GameUI:
     def increment_score(self):
         """Increment the player's score."""
         self.score += 1
+    
+    def decrement_score(self):
+        """Decrement the player's score."""
+        self.score -= 1
 
     def display(self, frame):
         """Display the current command and score on the screen."""
