@@ -78,10 +78,12 @@ def boxing_feed():
     page_width = int(request.args.get("page_width"))
     page_height = int(request.args.get("page_height"))
     if not video_camera_instance:
+        multiplayerData = None
         # TEMP TESTING CODE
-        multiplayerData = MultiPlayerConnectionData(
-            peer_ip="10.217.13.79", peer_port=8080
-        )
+        if mode == "multiplayer":
+            multiplayerData = MultiPlayerConnectionData(
+                peer_ip="10.217.13.79", peer_port=8080
+            )
         video_camera_instance = VideoCamera(
             page_width, page_height, multiplayerData=multiplayerData
         )
