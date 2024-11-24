@@ -10,6 +10,8 @@ from pygame import mixer
 mixer.init()
 
 collision_sound = mixer.Sound("assets/collisionsound.mp3")
+
+
 class Challenge():
     def __init__(self, name, image, observer=None):
         self.name = name
@@ -94,7 +96,6 @@ class ChallengeManager():
         # Replace the old list with the updated list
         self.challenges = updated_challenges
 
-
     def generatePunchChallenge(self, frameWidth=1920, frameHeight=1080, startSize=50, timeToLive=5, observer=None):
         endSize = frameWidth // 4
         x = random.randint((endSize) // 2 + 1,
@@ -105,12 +106,13 @@ class ChallengeManager():
         self.challenges.append(challenge)
         return challenge
 
-    def addPunchChallenge(self, normalizedPunchLocation, multiplayerPunch=False):
+    def addPunchChallenge(self, normalizedPunchLocation, multiplayerPunch=False, observer=None):
         x = int(normalizedPunchLocation[0] *
                 int(os.getenv("FRAME_WIDTH", 1920)))
         y = int(normalizedPunchLocation[1] *
                 int(os.getenv("FRAME_HEIGHT", 1080)))
-        challenge = PunchChallenge(x, y, multiplayerPunch=multiplayerPunch)
+        challenge = PunchChallenge(
+            x, y, multiplayerPunch=multiplayerPunch, observer=observer)
         self.challenges.append(challenge)
 
     def drawChallenges(self, frame):

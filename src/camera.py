@@ -67,11 +67,7 @@ class VideoCamera(object):
         os.environ["FRAME_WIDTH"] = f"{FRAME_WIDTH}"
         os.environ["FRAME_HEIGHT"] = f"{FRAME_HEIGHT}"
 
-        def collision_callback(self):
-            self.health -= 1
-
         self.collisionObserver = CollisionObserver()
-        self.collisionObserver.registerCallback(collision_callback)
         self.challengeManager = ChallengeManager()
 
         self.multiplayerManager = None
