@@ -4,7 +4,7 @@ import time
 from game_ui import GameUI
 from punch_detector import PunchDetector
 from sound_effect import SoundEffect
-from speed import Speed
+from Speed import Speed
 from datetime import datetime
 from punch_animation import PunchAnimation
 from challenge import ChallengeManager
@@ -29,6 +29,7 @@ mp_pose = mp.solutions.pose
 pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 mp_drawing = mp.solutions.drawing_utils
 
+
 game_ui = GameUI()
 punch_detector = PunchDetector()
 speed = Speed(QUEUE_SIZE)
@@ -38,6 +39,8 @@ ignore_left, ignore_right = 0, 0
 # Open webcam
 cap = cv2.VideoCapture(CV_VIDEO_CAPTURE_DEVICE)
 
+screen_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+screen_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 FRAME_WIDTH = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  # int `width`
 FRAME_HEIGHT = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))  # int `height`
 CHALLENGE_START_SIZE = 50

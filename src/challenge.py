@@ -72,16 +72,24 @@ class ChallengeManager():
 
     def update_challenges(self, landmarks):
         # Get value field from protobuf
-        if landmarks and landmarks.landmark:
+        if landmarks and hasattr(landmarks, 'landmark'):
             landmarks = landmarks.landmark
         else:
-            print(f"Warning: Challenge {self} did not receive landmarks")
+            print(f"Warning: ChallengeManager did not receive valid landmarks")
             return
+
+        # Filter out expired challenges
+        updated_challenges = []
         for challenge in self.challenges:
-            challenge.update(landmarks)
-            if challenge.expired:
-                self.challenges.remove(challenge)
-        # handle collisions
+            challenge.update(landmarks)  # Update the challenge
+            if not challenge.expired:   # Keep non-expired challenges
+                updated_challenges.append(challenge)
+            else:
+                print(f"Challenge expired and removed: {challenge}")
+
+        # Replace the old list with the updated list
+        self.challenges = updated_challenges
+
 
     def generatePunchChallenge(self, frameWidth=1920, frameHeight=1080, startSize=50, timeToLive=5, observer=None):
         endSize = frameWidth // 4
