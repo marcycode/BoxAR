@@ -119,6 +119,17 @@ while cap.isOpened():
             thickness,
         )
 
+        # Display the game UI (commands and score)
+        frame = punchanimation.draw(frame)
+
+        frame = game_ui.display(frame)
+
+        # Show the video feed
+        cv2.imshow("Punch Detection Game", frame)
+        cv2.waitKey(1)
+        time.sleep(3)
+        break
+
     # Update the game command
     game_ui.update_command()
 
