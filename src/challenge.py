@@ -4,6 +4,7 @@ import numpy as np
 
 from collision_detection import hitCriticalMass
 from block import Block
+import os
 
 
 class Challenge():
@@ -15,8 +16,8 @@ class Challenge():
 
 
 class PunchChallenge(Challenge):
-    END_SIZE = 300
-    BASE_IMG = cv2.imread("glove.png")
+    END_SIZE = int(os.getenv("FRAME_WIDTH", "400")) // 3
+    BASE_IMG = cv2.imread("assets/glove.png")
 
     def __init__(self, x: int, y: int, startSize: int, timeToLive=3, observer=None):
         super().__init__("Punch Challenge", PunchChallenge.BASE_IMG, observer)
@@ -76,10 +77,11 @@ class ChallengeManager():
         # handle collisions
 
     def generatePunchChallenge(self, frameWidth=1920, frameHeight=1080, startSize=50, timeToLive=5, observer=None):
-        x = random.randint(PunchChallenge.END_SIZE // 2 + 1,
-                           frameWidth - PunchChallenge.END_SIZE)
-        y = random.randint(PunchChallenge.END_SIZE // 2 + 1,
-                           frameHeight - PunchChallenge.END_SIZE)
+        endSize = frameWidth // 4
+        x = random.randint((endSize) // 2 + 1,
+                           frameWidth - endSize)
+        y = random.randint(endSize // 2 + 1,
+                           frameHeight - endSize)
         challenge = PunchChallenge(x, y, startSize, timeToLive, observer)
         self.challenges.append(challenge)
         return challenge
