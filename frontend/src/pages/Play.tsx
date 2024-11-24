@@ -109,6 +109,14 @@ function Play() {
         >
           Back to Select Mode
         </button>
+
+        {/* Back to Select Mode Button */}
+        <button
+          onClick={() => navigate("/leaderboard")} // Navigate to select-mode
+          className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 shadow-md"
+        >
+          View Leaderboard
+        </button>
       </div>
     </>
   );
