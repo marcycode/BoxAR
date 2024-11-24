@@ -397,7 +397,7 @@ class VideoCamera(object):
 
             if self.health > 0:
                 # Health Bar Dimensions
-                bar_x = 500  # X-coordinate of the health bar
+                bar_x = 650  # X-coordinate of the health bar
                 bar_y = 50  # Y-coordinate of the health bar
                 bar_width = 300  # Full width of the health bar
                 bar_height = 30  # Height of the health bar
