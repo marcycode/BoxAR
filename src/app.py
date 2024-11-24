@@ -113,7 +113,7 @@ def receive_punch():
         res = Response("Invalid punch location", status=400)
         return res
     video_camera_instance.challengeManager.addPunchChallenge(
-        data.get("punchLocation"), multiplayerPunch=True
+        data.get("punchLocation"), multiplayerPunch=True, observer=video_camera_instance.collisionObserver
     )
     return "Punch received"
 
