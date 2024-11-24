@@ -44,8 +44,8 @@ class VideoCamera(object):
         # FIX BELOW
         self.video.set(3, page_width / 1.75)  # 3 -> WIDTH
         self.video.set(4, page_height / 1.75)  # 4 -> HEIGHT
-        FRAME_WIDTH = int(page_width / 1.75)   # int `width`
-        FRAME_HEIGHT = int(page_height / 1.75)  # int `height`
+        FRAME_WIDTH = int(self.video.get(cv2.CAP_PROP_FRAME_WIDTH))   # int `width`
+        FRAME_HEIGHT = int(self.video.get(cv2.CAP_PROP_FRAME_HEIGHT))  # int `height`
         CHALLENGE_START_SIZE = 50
 
         os.environ["FRAME_WIDTH"] = f"{FRAME_WIDTH}"
