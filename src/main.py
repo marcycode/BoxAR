@@ -10,9 +10,13 @@ from punchanimation import PunchAnimation
 from challenge import ChallengeManager
 from update_hook import EventManager
 from observer import CollisionObserver
+from pygame import mixer
 import os
 
 punchanimation = PunchAnimation("assets/punchanimation.gif")
+
+
+background_music = mixer.Sound("assets/backgroundmusic.mp3")
 
 QUEUE_SIZE = 10
 COOLDOWN = 0
@@ -58,10 +62,12 @@ context = {
     "observer": collisionObserver
 }
 
-duration = 100
+duration = 30
 start_time = datetime.now()
-
+background_music.set_volume(1)
+background_music.play()
 while cap.isOpened():
+   
     ret, frame = cap.read()
     if not ret:
         print("Error accessing the camera.")
