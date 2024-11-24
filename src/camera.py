@@ -340,14 +340,6 @@ class VideoCamera(object):
                     if punch_sound.play():  # Play sound with cooldown
                         punchanimation.trigger(right_hand_position)
 
-                # TEMP TESTING CODE
-                if left_jab and self.multiplayerManager:
-                    self.multiplayerManager.sendPunch(
-                        (left_wrist.x, left_wrist.y))
-                if right_jab and self.multiplayerManager:
-                    self.multiplayerManager.sendPunch(
-                        (right_wrist.x, right_wrist.y))
-
             collisions = self.collisionObserver.getCollisionCount()
             self.eventManager.update(self.context)
             self.drawManager.update(self.context)
@@ -660,6 +652,14 @@ class VideoCamera(object):
                         punchanimation.trigger(right_hand_position)
                         game_ui.increment_score()
                         game_ui.clear_command()
+
+                # TEMP TESTING CODE
+                if left_jab and self.multiplayerManager:
+                    self.multiplayerManager.sendPunch(
+                        (left_wrist.x, left_wrist.y))
+                if right_jab and self.multiplayerManager:
+                    self.multiplayerManager.sendPunch(
+                        (right_wrist.x, right_wrist.y))
 
             collisions = self.collisionObserver.getCollisionCount()
             self.eventManager.update(self.context)

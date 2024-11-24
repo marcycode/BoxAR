@@ -27,9 +27,7 @@ class MultiPlayerManager():
             self.connected = False
 
     def sendPunch(self, punchLocation: tuple[float, float]):
-        print("sending punch")
         if time.time() - self.lastSentTime < self.cooldownSeconds:
-            print("Warning: Punch sent too soon")
             return
         data = {"punchLocation": punchLocation}
         try:
