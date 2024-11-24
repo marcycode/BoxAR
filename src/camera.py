@@ -6,11 +6,11 @@ import time
 import sys
 
 from game_ui import GameUI
-from PunchDetector import PunchDetector
+from punch_detector import PunchDetector
 from sound_effect import SoundEffect
-from Speed import Speed
+from speed import Speed
 from datetime import datetime
-from punchanimation import PunchAnimation
+from punch_animation import PunchAnimation
 from challenge import ChallengeManager
 from update_hook import EventManager
 from observer import CollisionObserver

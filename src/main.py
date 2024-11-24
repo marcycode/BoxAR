@@ -2,14 +2,15 @@ import cv2
 import mediapipe as mp
 import time
 from game_ui import GameUI
-from PunchDetector import PunchDetector
+from punch_detector import PunchDetector
 from sound_effect import SoundEffect
-from Speed import Speed
+from speed import Speed
 from datetime import datetime
-from punchanimation import PunchAnimation
+from punch_animation import PunchAnimation
 from challenge import ChallengeManager
 from update_hook import EventManager
 from observer import CollisionObserver
+from cv2constants import CV_VIDEO_CAPTURE_DEVICE
 from pygame import mixer
 import os
 
@@ -35,9 +36,9 @@ speed = Speed(QUEUE_SIZE)
 punch_sound = SoundEffect("assets/Punch.mp3", cooldown=1.0)
 ignore_left, ignore_right = 0, 0
 # Open webcam
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(CV_VIDEO_CAPTURE_DEVICE)
 
-FRAME_WIDTH = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))   # int `width`
+FRAME_WIDTH = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  # int `width`
 FRAME_HEIGHT = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))  # int `height`
 CHALLENGE_START_SIZE = 50
 
@@ -48,20 +49,23 @@ os.environ["FRAME_HEIGHT"] = f"{FRAME_HEIGHT}"
 collisionObserver = CollisionObserver()
 challengeManager = ChallengeManager()
 eventManager = EventManager()
-eventManager.addEvent("generatePunchChallenge", 100,
-                      challengeManager.generatePunchChallenge,
-                      ["frameWidth", "frameHeight", "startSize", "observer"])
-eventManager.addEvent("update_challenges", 4,
-                      challengeManager.update_challenges, ["landmarks"])
+eventManager.addEvent(
+    "generatePunchChallenge",
+    100,
+    challengeManager.generatePunchChallenge,
+    ["frameWidth", "frameHeight", "startSize", "observer"],
+)
+eventManager.addEvent(
+    "update_challenges", 4, challengeManager.update_challenges, ["landmarks"]
+)
 
 drawManager = EventManager()
-drawManager.addEvent("draw_challenges", 1,
-                     challengeManager.drawChallenges, ["frame"])
+drawManager.addEvent("draw_challenges", 1, challengeManager.drawChallenges, ["frame"])
 context = {
     "frameWidth": FRAME_WIDTH,
     "frameHeight": FRAME_HEIGHT,
     "startSize": CHALLENGE_START_SIZE,
-    "observer": collisionObserver
+    "observer": collisionObserver,
 }
 
 duration = 30
@@ -74,7 +78,7 @@ cv2.namedWindow("BoxAR", cv2.WND_PROP_FULLSCREEN)
 cv2.setWindowProperty("BoxAR", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
 while cap.isOpened():
-   
+
     ret, frame = cap.read()
     if not ret:
         print("Error accessing the camera.")
@@ -109,7 +113,6 @@ while cap.isOpened():
         game_over.play()
         # Define the text
         text = "GAME OVER!"
-        
 
         # Font settings
         font = cv2.FONT_HERSHEY_SIMPLEX
@@ -119,7 +122,8 @@ while cap.isOpened():
 
         # Get text size
         (text_width, text_height), baseline = cv2.getTextSize(
-            text, font, font_scale, thickness)
+            text, font, font_scale, thickness
+        )
 
         # Calculate the position for the text to appear in the center
         frame_height, frame_width, _ = frame.shape
@@ -196,7 +200,8 @@ while cap.isOpened():
         )
 
         right_average, left_average = speed.calculate_speeds(
-            current_time, right_wrist_position, left_wrist_position)
+            current_time, right_wrist_position, left_wrist_position
+        )
         right_average, left_average = speed.calculate_speeds(
             current_time, right_wrist_position, left_wrist_position
         )
@@ -221,14 +226,13 @@ while cap.isOpened():
                 game_ui.increment_score()
                 game_ui.clear_command()
 
-
         elif current_command == "Right Jab" and right_jab and not ignore_right:
             ignore_right += 1
             if punch_sound.play():  # Play sound with cooldown
                 punchanimation.trigger(right_hand_position)
                 game_ui.increment_score()
                 game_ui.clear_command()
-                
+
     collisions = collisionObserver.getCollisionCount()
     eventManager.update(context)
     drawManager.update(context)
