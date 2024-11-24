@@ -26,12 +26,11 @@ class CooldownBar():
         bar_y = 50
 
         # Calculate current cooldown bar width
-        # Assuming max health = 20
         current_bar_width = int(
             (self.currentCooldown / self.maxCooldown) * bar_width)
 
-        cv2.putText(frame, f"Cooldown: {self.currentCooldown}", (bar_x - 300, bar_y + 20),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+        # cv2.putText(frame, f"Cooldown: {self.currentCooldown}", (bar_x - 300, bar_y + 20),
+        #             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
         # Draw the background (gray bar)
         cv2.rectangle(frame, (bar_x, bar_y), (bar_x + bar_width,
                       bar_y + bar_height), (128, 128, 128), -1)
