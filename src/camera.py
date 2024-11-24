@@ -35,7 +35,7 @@ punch_sound = SoundEffect(
 )  # Set a 1-second cooldown for the punch sound
 ignore_left, ignore_right = 0, 0
 
-duration = 100
+duration = 30
 start_time = datetime.now()
 
 
@@ -82,9 +82,11 @@ class VideoCamera(object):
 
     def __del__(self):
         self.video.release()
+        cv2.destroyAllWindows()
 
     def score_mode(self):
         global ignore_left, ignore_right
+        flag = True
         while self.video.isOpened():
             ret, frame = self.video.read()
             if not ret:
@@ -144,6 +146,7 @@ class VideoCamera(object):
                     color,
                     thickness,
                 )
+                flag = False
 
             # Update the game command
             game_ui.update_command()
@@ -235,12 +238,8 @@ class VideoCamera(object):
 
             frame = game_ui.display(frame)
 
-            # Exit on pressing 'q'
-            if cv2.waitKey(1) & 0xFF == ord("q"):
-                break
-
             ret, jpeg = cv2.imencode(".jpg", frame)
-            return jpeg.tobytes()
+            return jpeg.tobytes(), flag, game_ui.score
 
     def free_mode(self):
         global ignore_left, ignore_right
@@ -349,6 +348,7 @@ class VideoCamera(object):
 
     def survival_mode(self):
         global ignore_left, ignore_right
+        flag = True
         while self.video.isOpened():
             ret, frame = self.video.read()
             if not ret:
@@ -403,6 +403,7 @@ class VideoCamera(object):
                     color,
                     thickness,
                 )
+                flag = False
 
             # Update the game command
             game_ui.update_command()
@@ -499,7 +500,7 @@ class VideoCamera(object):
                 break
 
             ret, jpeg = cv2.imencode(".jpg", frame)
-            return jpeg.tobytes()
+            return jpeg.tobytes(), flag, game_ui.score
 
     def multiplayer_mode(self):
         global ignore_left, ignore_right
