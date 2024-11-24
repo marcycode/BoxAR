@@ -655,6 +655,9 @@ class VideoCamera(object):
             if collisions <= self.collisionObserver.getCollisionCount() - 1:
                 self.health -= 1
 
+            # Display the game UI (commands and score)
+            frame = punchanimation.draw(frame)
+
             # Exit on pressing 'q'
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
