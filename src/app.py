@@ -1,13 +1,26 @@
 from flask import Flask, render_template, Response, request
+<<<<<<< HEAD
 from flask_cors import CORS, cross_origin
+=======
+from flask_cors import CORS  # Import Flask-CORS
+>>>>>>> af0060040f274737c5a0dcd490c54d745c257a36
 from camera import VideoCamera
-
+from multiplayer import MultiPlayerConnectionData
 
 app = Flask(__name__)
+<<<<<<< HEAD
 cors = CORS(app)  # allow CORS for all domains on all routes.
 app.config["CORS_HEADERS"] = "Content-Type"
+=======
+camera_context: VideoCamera = None
+>>>>>>> af0060040f274737c5a0dcd490c54d745c257a36
 score = 0
 flag = True
+CORS(app)  # Enable CORS for all routes
+
+# Global variables
+score = 0
+video_camera_instance = None  # Initialize as None
 
 
 @app.route("/")
@@ -27,6 +40,23 @@ def points():
     return {"score": str(score), "finished": str(not flag)}
 
 
+<<<<<<< HEAD
+=======
+
+@app.route("/restart", methods=["POST"])
+def restart():
+    global video_camera_instance
+    try:
+        if video_camera_instance is not None:
+            video_camera_instance.restart()
+            return "Game restarted successfully", 200
+        else:
+            return "No active game instance to restart", 400
+    except Exception as e:
+        print(f"Error during restart: {e}")  # Log the error to the server console
+        return f"An error occurred: {str(e)}", 500
+
+>>>>>>> af0060040f274737c5a0dcd490c54d745c257a36
 def gen(camera, mode):
     global flag
     global score
@@ -40,7 +70,7 @@ def gen(camera, mode):
             frame = camera.free_mode()
         elif mode == "multiplayer":
             # TODO add multiplayer mode logic
-            frame = camera.multiplayer_mode()
+            frame, flag = camera.multiplayer_mode()
         else:
             frame = camera.free_mode()
         score = s
@@ -50,17 +80,48 @@ def gen(camera, mode):
 
 @app.route("/boxing_feed")
 def boxing_feed():
+    global camera_context
+    global video_camera_instance  # Access the global instance
     mode = request.args.get("mode")
     if mode is None:
         mode = "free-play"
     page_width = int(request.args.get("page_width"))
     page_height = int(request.args.get("page_height"))
+    if not camera_context:
+        # TEMP TESTING CODE
+        multiplayerData = MultiPlayerConnectionData(
+            peer_ip="10.217.13.79", peer_port=8080)
+        camera_context = VideoCamera(
+            page_width, page_height, multiplayerData=multiplayerData)
+    if video_camera_instance is None:
+        video_camera_instance = VideoCamera(page_width, page_height)  # Initialize instance
     response = Response(
-        gen(VideoCamera(page_width, page_height), mode),
+        gen(video_camera_instance, mode),
         mimetype="multipart/x-mixed-replace; boundary=frame",
     )
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response
+
+
+@app.post("/api/punch")
+def receive_punch():
+    global camera_context
+    data = request.json
+    assert ("punchLocation" in data)
+
+    if not camera_context:
+        res = Response("Camera not initialized", status=500)
+        return res
+
+    punchLocation = data.get("punchLocation")
+    try:
+        punchLocation = (float(punchLocation[0]), float(punchLocation[1]))
+    except ValueError:
+        res = Response("Invalid punch location", status=400)
+        return res
+    camera_context.challengeManager.addPunchChallenge(
+        data.get("punchLocation"), multiplayerPunch=True)
+    return "Punch received"
 
 
 if __name__ == "__main__":

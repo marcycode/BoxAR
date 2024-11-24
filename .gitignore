@@ -10,3 +10,4 @@ oop/__pycache__/
 frontend/node_modules
 frontend/package-lock.json
 frontend/.vite
+cv2constants.py

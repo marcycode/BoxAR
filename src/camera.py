@@ -12,6 +12,7 @@ from speed import Speed
 from datetime import datetime
 from punch_animation import PunchAnimation
 from challenge import ChallengeManager
+from multiplayer import MultiPlayerManager, MultiPlayerConnectionData
 from update_hook import EventManager
 from observer import CollisionObserver
 from cv2constants import CV_VIDEO_CAPTURE_DEVICE
@@ -19,7 +20,14 @@ import os
 
 # Initialize MediaPipe pose detection
 mp_pose = mp.solutions.pose
-pose = mp_pose.Pose()
+pose = mp_pose.Pose(
+    static_image_mode=False,
+    model_complexity=1,
+    smooth_landmarks=True,
+    min_detection_confidence=0.5,
+    min_tracking_confidence=0.5
+)
+
 mp_drawing = mp.solutions.drawing_utils
 
 punchanimation = PunchAnimation("assets/punchanimation.gif")
@@ -40,13 +48,15 @@ start_time = datetime.now()
 
 
 class VideoCamera(object):
-    def __init__(self, page_width, page_height):
+    def __init__(self, page_width, page_height, multiplayerData: MultiPlayerConnectionData = None):
         self.video = cv2.VideoCapture(CV_VIDEO_CAPTURE_DEVICE)
         # FIX BELOW
         self.video.set(3, page_width / 1.75)  # 3 -> WIDTH
         self.video.set(4, page_height / 1.75)  # 4 -> HEIGHT
-        FRAME_WIDTH = int(self.video.get(cv2.CAP_PROP_FRAME_WIDTH))  # int `width`
-        FRAME_HEIGHT = int(self.video.get(cv2.CAP_PROP_FRAME_HEIGHT))  # int `height`
+        FRAME_WIDTH = int(self.video.get(
+            cv2.CAP_PROP_FRAME_WIDTH))  # int `width`
+        FRAME_HEIGHT = int(self.video.get(
+            cv2.CAP_PROP_FRAME_HEIGHT))  # int `height`
         CHALLENGE_START_SIZE = 50
 
         os.environ["FRAME_WIDTH"] = f"{FRAME_WIDTH}"
@@ -54,23 +64,31 @@ class VideoCamera(object):
 
         self.collisionObserver = CollisionObserver()
         self.challengeManager = ChallengeManager()
+
+        self.multiplayerManager = None
+        if multiplayerData:
+            self.multiplayerManager = MultiPlayerManager(
+                multiplayerData.peer_ip, multiplayerData.peer_port, self.challengeManager)
+
         self.eventManager = EventManager()
-        self.eventManager.addEvent(
-            "generatePunchChallenge",
-            100,
-            self.challengeManager.generatePunchChallenge,
-            ["frameWidth", "frameHeight", "startSize", "observer"],
-        )
+        if not multiplayerData:
+            self.eventManager.addEvent(
+                "generatePunchChallenge",
+                100,
+                self.challengeManager.generatePunchChallenge,
+                ["frameWidth", "frameHeight", "startSize", "observer"],
+            )
         self.eventManager.addEvent(
             "update_challenges",
-            4,
+            5,
             self.challengeManager.update_challenges,
             ["landmarks"],
         )
 
         self.drawManager = EventManager()
         self.drawManager.addEvent(
-            "draw_challenges", 1, self.challengeManager.drawChallenges, ["frame"]
+            "draw_challenges", 1, self.challengeManager.drawChallenges, [
+                "frame"]
         )
         self.context = {
             "frameWidth": FRAME_WIDTH,
@@ -79,6 +97,16 @@ class VideoCamera(object):
             "observer": self.collisionObserver,
         }
         self.health = 20
+        self.duration = 30  # Timer for scoring mode
+        self.start_time = datetime.now()  # Initialize timer start time
+    
+
+    def restart(self):
+        """Reset game state for both scoring and survival modes."""
+        self.health = 20  # Reset health for survival mode
+        self.start_time = datetime.now()  # Reset timer for scoring mode
+        game_ui.reset_score()  # Reset score
+
 
     def __del__(self):
         self.video.release()
@@ -104,9 +132,7 @@ class VideoCamera(object):
             self.context["landmarks"] = results.pose_landmarks
 
             # Get time and show timer
-            active_time = (
-                duration - (datetime.now() - start_time).seconds
-            )  # converting into seconds
+            active_time = self.duration - (datetime.now() - self.start_time).seconds
 
             if active_time > 0:
                 cv2.putText(
@@ -504,6 +530,7 @@ class VideoCamera(object):
 
     def multiplayer_mode(self):
         global ignore_left, ignore_right
+        flag = True
         while self.video.isOpened():
             ret, frame = self.video.read()
             if not ret:
@@ -520,15 +547,10 @@ class VideoCamera(object):
             self.context["frame"] = frame
             self.context["landmarks"] = results.pose_landmarks
 
-            # Get time and show timer
-            active_time = (
-                duration - (datetime.now() - start_time).seconds
-            )  # converting into seconds
-
-            if active_time > 0:
+            if self.health > 0:
                 cv2.putText(
                     frame,
-                    str(active_time),
+                    str(self.health),
                     (frame.shape[1] - 100, 50),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     2,
@@ -563,6 +585,8 @@ class VideoCamera(object):
                     color,
                     thickness,
                 )
+
+                flag = False
 
             # Update the game command
             game_ui.update_command()
@@ -627,36 +651,31 @@ class VideoCamera(object):
                     right_average,
                 )
 
-                # Check for correct punches based on the current command
-                current_command = game_ui.current_command
-                if current_command == "Left Jab" and left_jab and not ignore_left:
+                if left_jab and not ignore_left and self.multiplayerManager:
                     ignore_left += 1
                     if punch_sound.play():  # Play sound with cooldown
                         punchanimation.trigger(left_hand_position)
-                        game_ui.increment_score()
-                        game_ui.clear_command()
-
-                elif current_command == "Right Jab" and right_jab and not ignore_right:
+                    self.multiplayerManager.sendPunch(
+                        (left_wrist.x, left_wrist.y))
+                if right_jab and not ignore_right and self.multiplayerManager:
                     ignore_right += 1
                     if punch_sound.play():  # Play sound with cooldown
-                        punchanimation.trigger(right_hand_position)
-                        game_ui.increment_score()
-                        game_ui.clear_command()
+                        punchanimation.trigger(left_hand_position)
+                    self.multiplayerManager.sendPunch(
+                        (right_wrist.x, right_wrist.y))
 
             collisions = self.collisionObserver.getCollisionCount()
             self.eventManager.update(self.context)
             self.drawManager.update(self.context)
-            if collisions == self.collisionObserver.getCollisionCount() - 1:
-                game_ui.decrement_score()
+            if collisions <= self.collisionObserver.getCollisionCount() - 1:
+                self.health -= 1
 
             # Display the game UI (commands and score)
             frame = punchanimation.draw(frame)
-
-            frame = game_ui.display(frame)
 
             # Exit on pressing 'q'
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
             ret, jpeg = cv2.imencode(".jpg", frame)
-            return jpeg.tobytes()
+            return jpeg.tobytes(), flag

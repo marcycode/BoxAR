@@ -19,13 +19,14 @@ class PunchChallenge(Challenge):
     END_SIZE = int(os.getenv("FRAME_WIDTH", "400")) // 3
     BASE_IMG = cv2.imread("assets/glove.png")
 
-    def __init__(self, x: int, y: int, startSize: int, timeToLive=3, observer=None):
+    def __init__(self, x: int, y: int, startSize: int = 50, timeToLive=3, observer=None, multiplayerPunch=False):
         super().__init__("Punch Challenge", PunchChallenge.BASE_IMG, observer)
         self.x = x
         self.y = y
         self.size = startSize
         self.timeToLive = timeToLive
         self.growthRate = ((self.END_SIZE - startSize) // timeToLive) + 1
+        self.multiplayerPunch = multiplayerPunch
 
     def update(self, landmarks):
         self.size += self.growthRate
@@ -45,11 +46,17 @@ class PunchChallenge(Challenge):
         self.image = cv2.resize(PunchChallenge.BASE_IMG,
                                 (size, size))
         adjustmentPixel = 1 if size % 2 != 0 else 0
-        frame[y - size // 2: y + size // 2 + adjustmentPixel, x - size // 2: x + size // 2 + adjustmentPixel] = cv2.addWeighted(
-            frame[y - size // 2: y + size // 2 + adjustmentPixel, x - size // 2: x + size // 2 + adjustmentPixel], 1.0, self.image, 1.0, 1)
-
-        cv2.circle(frame, (x, y), (PunchChallenge.END_SIZE - 10) //
-                   2, (0, 0, 255), 2)
+        try:
+            frame[y - size // 2: y + size // 2 + adjustmentPixel, x - size // 2: x + size // 2 + adjustmentPixel] = cv2.addWeighted(
+                frame[y - size // 2: y + size // 2 + adjustmentPixel, x - size // 2: x + size // 2 + adjustmentPixel], 1.0, self.image, 1.0, 1)
+            # red if generated, green if multiplayer
+            outlineColor = (
+                255, 0, 0) if not self.multiplayerPunch else (0, 255, 0)
+            cv2.circle(frame, (x, y), (PunchChallenge.END_SIZE - 10) //
+                       2, outlineColor, 2)
+        except:
+            print(
+                f"Warning: PunchChallenge {self} could not overlay challenge on frame")
 
     def checkCollision(self, landmarks):
         block = Block()
@@ -85,6 +92,14 @@ class ChallengeManager():
         challenge = PunchChallenge(x, y, startSize, timeToLive, observer)
         self.challenges.append(challenge)
         return challenge
+
+    def addPunchChallenge(self, normalizedPunchLocation, multiplayerPunch=False):
+        x = int(normalizedPunchLocation[0] *
+                int(os.getenv("FRAME_WIDTH", 1920)))
+        y = int(normalizedPunchLocation[1] *
+                int(os.getenv("FRAME_HEIGHT", 1080)))
+        challenge = PunchChallenge(x, y, multiplayerPunch=multiplayerPunch)
+        self.challenges.append(challenge)
 
     def drawChallenges(self, frame):
         for challenge in self.challenges:
