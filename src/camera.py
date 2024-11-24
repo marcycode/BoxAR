@@ -75,11 +75,6 @@ class VideoCamera(object):
     def __del__(self):
         self.video.release()
 
-    def get_frame(self):
-        ret, frame = self.video.read()
-        ret, jpeg = cv2.imencode(".jpg", frame)
-        return jpeg.tobytes()
-
     def score_mode(self):
         global ignore_left, ignore_right
         while self.video.isOpened():
