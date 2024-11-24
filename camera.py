@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import math
+from cv2constants import CV_VIDEO_CAPTURE_DEVICE
 
 # Initialize MediaPipe pose detection
 mp_pose = mp.solutions.pose
@@ -38,16 +39,19 @@ def detectBlock(landmarks):
     )
     right_tuck = (
         calculate_distance(
-            [right_elbow.x, right_elbow.y], [right_shoulder.x, right_shoulder.y]
+            [right_elbow.x, right_elbow.y], [
+                right_shoulder.x, right_shoulder.y]
         )
         < 0.05
     )
 
     left_wrist_face = (
-        calculate_distance([left_wrist.x, left_wrist.y], [nose.x, nose.y]) < 0.1
+        calculate_distance([left_wrist.x, left_wrist.y],
+                           [nose.x, nose.y]) < 0.1
     )
     right_wrist_face = (
-        calculate_distance([right_wrist.x, right_wrist.y], [nose.x, nose.y]) < 0.1
+        calculate_distance([right_wrist.x, right_wrist.y],
+                           [nose.x, nose.y]) < 0.1
     )
 
     return left_tuck and right_tuck and left_wrist_face and right_wrist_face
@@ -55,7 +59,7 @@ def detectBlock(landmarks):
 
 class VideoCamera(object):
     def __init__(self, page_width, page_height):
-        self.video = cv2.VideoCapture(1)
+        self.video = cv2.VideoCapture(CV_VIDEO_CAPTURE_DEVICE)
         # FIX BELOW
         self.video.set(3, page_width / 1.75)  # 3 -> WIDTH
         self.video.set(4, page_height / 1.75)  # 4 -> HEIGHT
