@@ -28,7 +28,7 @@ export default function NavBar() {
             <NavigationMenuItem className="cursor-pointer">
               <NavigationMenuLink
                 className="bg-slate-300 hover:bg-red-500 rounded-md hover:text-white text-black px-[1vw] py-[1.2vw] mx-2"
-                onClick={() => navigate("/play")}
+                onClick={() => navigate("/select-mode")}
               >
                 Fight Now
               </NavigationMenuLink>

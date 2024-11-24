@@ -9,3 +9,4 @@ oop/__pycache__/
 
 boxAR-frontend/node_modules
 boxAR-frontend/package-lock.json
+boxAR-frontend/.vite

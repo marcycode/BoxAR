@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { PuffLoader } from "react-spinners";
+import { useSearchParams } from "react-router";
 
 function Play() {
+  const [searchParams] = useSearchParams();
+
+  const mode = searchParams.get("mode");
+
   let page_width = window.innerWidth;
   let page_height = window.innerHeight;
 
@@ -14,7 +19,7 @@ function Play() {
         <img
           onLoad={() => setGameLoaded(true)}
           style={gameloaded ? {} : { display: "none" }}
-          src={`http://localhost:8000/boxing_feed?page_width=${page_width}&page_height=${page_height}`}
+          src={`http://localhost:8000/boxing_feed?page_width=${page_width}&page_height=${page_height}&mode=${mode}`}
           alt="BoxAR Interactive window"
         />
       </div>
